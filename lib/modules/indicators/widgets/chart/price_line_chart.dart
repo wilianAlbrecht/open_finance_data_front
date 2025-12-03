@@ -2,6 +2,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_layout.dart';
+import '../../../../core/theme/themes/extensions/app_chart_theme.dart';
+import '../../../../core/theme/themes/extensions/app_card_theme.dart';
+
 class PriceLineChart extends StatelessWidget {
   final List<double> open;
   final List<double> high;
@@ -28,12 +34,8 @@ class PriceLineChart extends StatelessWidget {
     this.showClose = true,
   });
 
-  List<FlSpot> _spots(List<double> data) {
-    return List.generate(
-      data.length,
-      (i) => FlSpot(i.toDouble(), data[i]),
-    );
-  }
+  List<FlSpot> _spots(List<double> data) =>
+      List.generate(data.length, (i) => FlSpot(i.toDouble(), data[i]));
 
   String _formatDate(int unix) {
     final dt = DateTime.fromMillisecondsSinceEpoch(unix * 1000);
@@ -42,10 +44,11 @@ class PriceLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ============================
-    // Cálculo automático do eixo Y
-    // ============================
+    final chartTheme = Theme.of(context).extension<AppChartTheme>()!;
+    final cardTheme = Theme.of(context).extension<AppCardTheme>()!;
+    final textSecondary = Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.7);
 
+    // Valores dinâmicos (escala Y)
     final allValues = [
       ...close,
       if (showOpen) ...open,
@@ -58,17 +61,14 @@ class PriceLineChart extends StatelessWidget {
     final diff = maxY - minY;
     final step = diff / 4;
 
-    // ============================
-    // Construção das séries
-    // ============================
-
-    List<LineChartBarData> series = [];
+    // ===== SERIES DO GRÁFICO =====
+    final series = <LineChartBarData>[];
 
     if (showClose) {
       series.add(
         LineChartBarData(
           spots: _spots(close),
-          color: Colors.blue,
+          color: chartTheme.closeColor,
           isCurved: true,
           barWidth: 2,
         ),
@@ -79,7 +79,7 @@ class PriceLineChart extends StatelessWidget {
       series.add(
         LineChartBarData(
           spots: _spots(open),
-          color: Colors.orange,
+          color: chartTheme.openColor,
           isCurved: true,
           barWidth: 2,
         ),
@@ -90,7 +90,7 @@ class PriceLineChart extends StatelessWidget {
       series.add(
         LineChartBarData(
           spots: _spots(high),
-          color: Colors.green,
+          color: chartTheme.highColor,
           isCurved: true,
           barWidth: 2,
         ),
@@ -101,28 +101,30 @@ class PriceLineChart extends StatelessWidget {
       series.add(
         LineChartBarData(
           spots: _spots(low),
-          color: Colors.red,
+          color: chartTheme.lowColor,
           isCurved: true,
           barWidth: 2,
         ),
       );
     }
 
-    // ============================
-    // LINHAS VERTICAIS NO GRID
-    // ============================
-
+    // ===== GRID X =====
     final stepX = (timestamp.length / 4).floor();
     final tickPositions = List.generate(5, (i) => (i * stepX).toDouble());
     const tolerance = 0.3;
 
     return Container(
       height: 270,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      padding: AppLayout.paddingSm,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        color: cardTheme.background,
+        borderRadius: cardTheme.radius == 16
+            ? AppLayout.radiusMd
+            : BorderRadius.circular(cardTheme.radius),
       ),
       child: LineChart(
         LineChartData(
@@ -133,58 +135,50 @@ class PriceLineChart extends StatelessWidget {
             show: true,
             drawVerticalLine: true,
             getDrawingHorizontalLine: (_) =>
-                FlLine(color: Colors.grey.shade300, strokeWidth: 1),
+                FlLine(color: chartTheme.gridColor, strokeWidth: 1),
             getDrawingVerticalLine: (value) {
-              bool isTick = tickPositions.any((tick) {
-                return (value - tick).abs() < tolerance;
-              });
+              final isTick = tickPositions.any((tick) => (value - tick).abs() < tolerance);
 
               return FlLine(
-                color: isTick ? Colors.grey.shade300 : Colors.transparent,
+                color: isTick ? chartTheme.gridColor : Colors.transparent,
                 strokeWidth: 1,
               );
             },
           ),
 
-          // ============================
-          // EIXO Y - PREÇO
-          // ============================
           titlesData: FlTitlesData(
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 interval: step,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    value.toStringAsFixed(2),
-                    style: const TextStyle(fontSize: 10),
-                  );
-                },
+                getTitlesWidget: (value, meta) => Text(
+                  value.toStringAsFixed(2),
+                  style: AppTextStyles.body.copyWith(
+                    fontSize: 10,
+                    color: textSecondary,
+                  ),
+                ),
               ),
             ),
-
-            // ============================
-            // EIXO X - DATAS (fixas)
-            // ============================
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 interval: (timestamp.length / 4).floorToDouble(),
                 getTitlesWidget: (value, meta) {
-                  final int index = value.toInt();
-
+                  final index = value.toInt();
                   if (index < 0 || index >= timestamp.length) {
                     return const SizedBox.shrink();
                   }
-
                   return Text(
                     _formatDate(timestamp[index]),
-                    style: const TextStyle(fontSize: 10),
+                    style: AppTextStyles.body.copyWith(
+                      fontSize: 10,
+                      color: textSecondary,
+                    ),
                   );
                 },
               ),
             ),
-
             rightTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: false),
             ),

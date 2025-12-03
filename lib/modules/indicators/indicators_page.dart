@@ -1,58 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/price_line_chart.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/price_filter_bar.dart';
 
-// Widgets existentes
-import 'widgets/search_bar.dart';
-import 'widgets/categories_placeholder.dart';
-
-// Controller
+import '../../../../core/theme/app_layout.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/themes/extensions/app_card_theme.dart';
+import '../../../core/widgets/theme_toggle_button.dart';
 import 'indicators_controller.dart';
+import 'widgets/categories_placeholder.dart';
+import 'widgets/chart/price_filter_bar.dart';
+import 'widgets/chart/price_line_chart.dart';
+import 'widgets/search_bar.dart';
+
 
 class IndicatorsPage extends StatelessWidget {
   const IndicatorsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cardTheme = Theme.of(context).extension<AppCardTheme>()!;
+    final textColor = Theme.of(context).colorScheme.onSurface;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('OpenFinanceData'), elevation: 0),
+      appBar: AppBar(
+        title: Text(
+          'OpenFinanceData',
+          style: AppTextStyles.title.copyWith(
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
+        ),
+        elevation: 0,
+        actions: const [
+          ThemeToggleButton(), 
+        ],
+      ),
+
       body: ListView(
+        padding: EdgeInsets.zero, // remove padding padrão
         children: [
+          // ========= SEARCH BAR =========
           const SearchBarWidget(),
 
+          // ========= CONSUMER PRINCIPAL =========
           Consumer<IndicatorsController>(
             builder: (context, controller, _) {
+              // ===== LOADING =====
               if (controller.isLoading) {
-                return const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Center(child: CircularProgressIndicator()),
+                return Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: const Center(child: CircularProgressIndicator()),
                 );
               }
 
+              // ===== NENHUM ATIVO CARREGADO =====
               if (controller.close.isEmpty) {
                 return Container(
                   height: 200,
                   margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
+                  padding: AppLayout.paddingMd,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(16),
+                    color: cardTheme.background,
+                    borderRadius: AppLayout.radiusMd,
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       "Busque um ativo para visualizar o gráfico",
-                      style: TextStyle(fontSize: 16),
+                      style: AppTextStyles.body.copyWith(
+                        fontSize: 16,
+                        color: textColor.withOpacity(0.7),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 );
               }
 
+              // ===== RESULTADO CARREGADO =====
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 🔹 FILTROS
+                  // 🔹 FILTROS DO GRÁFICO
                   const PriceFilterBar(),
 
                   // 🔹 GRÁFICO
@@ -73,6 +103,7 @@ class IndicatorsPage extends StatelessWidget {
             },
           ),
 
+          // ========= PLACEHOLDER DAS CATEGORIAS =========
           const CategoriesPlaceholder(),
         ],
       ),

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../indicators_controller.dart'; // ajuste o path se necessário
 
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_layout.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/themes/extensions/app_card_theme.dart';
+
+import '../indicators_controller.dart';
 
 class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({super.key});
@@ -16,47 +21,72 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   void onSearch() {
     final value = controller.text.trim();
     if (value.isEmpty) return;
-
-    // Aqui você vai depois chamar:
-    // context.read(IndicatorsController).search(value);
-    // ou Navigator.pushNamed com o ativo
     context.read<IndicatorsController>().search(context, value);
   }
 
   @override
   Widget build(BuildContext context) {
+    final cardTheme = Theme.of(context).extension<AppCardTheme>()!;
+    final textColor = Theme.of(context).colorScheme.onSurface;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: [
-          // Campo de texto expandido
+          // ================= TEXT FIELD =================
           Expanded(
             child: TextField(
               controller: controller,
+              style: AppTextStyles.body.copyWith(color: textColor),
               decoration: InputDecoration(
                 hintText: 'Buscar ativo (ex: PETR4, AAPL, TSLA)',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: AppTextStyles.body.copyWith(
+                  color: textColor.withOpacity(0.6),
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: textColor.withOpacity(0.7),
+                ),
+
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
+                fillColor: cardTheme.background,
+
+                contentPadding: AppLayout.paddingSm,
+
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: AppLayout.radiusSm,
+                  borderSide: BorderSide(color: cardTheme.borderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: AppLayout.radiusSm,
+                  borderSide: BorderSide(color: cardTheme.borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: AppLayout.radiusSm,
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  ),
                 ),
               ),
+              onSubmitted: (_) => onSearch(),
             ),
           ),
 
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
 
-          // Botão de buscar
+          // ================= BUTTON =================
           ElevatedButton(
             onPressed: onSearch,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            child: Text(
+              "Buscar",
+              style: AppTextStyles.body.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
-            child: const Text("Buscar"),
           ),
         ],
       ),
