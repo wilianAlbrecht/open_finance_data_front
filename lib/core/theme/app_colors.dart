@@ -33,4 +33,10 @@ class AppColors {
   // Headers
   static const Color headerLight = Color(0xFF66BB6A);
   static const Color headerDark = Color(0xFF1B5E20);
+
+  // Botoes dos filtros quando ativados
+  static const Color filterOpen = Colors.orange;
+  static const Color filterHigh = Colors.green;
+  static const Color filterLow = Colors.red;
+  static const Color filterClose = Color(0xFF1E88E5); // azul do gráfico
 }

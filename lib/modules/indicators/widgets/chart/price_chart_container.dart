@@ -72,8 +72,7 @@ class _PriceChartContainerState extends State<PriceChartContainer> {
             },
 
             touchTooltipData: LineTouchTooltipData(
-              getTooltipColor: (_) =>
-                  Colors.black.withOpacity(0.75),
+              getTooltipColor: (_) => Colors.black.withOpacity(0.75),
 
               getTooltipItems: (touchedSpots) {
                 return touchedSpots.map((spot) {
@@ -94,17 +93,18 @@ class _PriceChartContainerState extends State<PriceChartContainer> {
           // =====================================================
           titlesData: widget.chart.titlesData.copyWith(
             bottomTitles: AxisTitles(
-              sideTitles: widget.chart.titlesData.bottomTitles.sideTitles!.copyWith(
-                interval: 1, // ← deixa todas as posições disponíveis
-                getTitlesWidget: (value, meta) {
-                  return _buildXAxisLabel(
-                    context,
-                    value,
-                    widget.timestamp,
-                    hoveredIndex,
-                  );
-                },
-              ),
+              sideTitles: widget.chart.titlesData.bottomTitles.sideTitles
+                  .copyWith(
+                    interval: 1, // ← deixa todas as posições disponíveis
+                    getTitlesWidget: (value, meta) {
+                      return _buildXAxisLabel(
+                        context,
+                        value,
+                        widget.timestamp,
+                        hoveredIndex,
+                      );
+                    },
+                  ),
             ),
           ),
         ),
@@ -130,17 +130,19 @@ class _PriceChartContainerState extends State<PriceChartContainer> {
       return const SizedBox.shrink();
     }
 
-    final isDivision = index % 6 == 0; // divisões principais
+    // === calcula step dinâmico ===
+    final step = (timestamp.length / 6).floor();
+    final isDivision = step > 0 && index % step == 0;
+
+    // === hover ===
     final isHovered = hoveredIndex == index;
 
-    // Só exibe quando for divisão principal ou ponto sob o mouse
+    // só aparece quando for divisão ou hover
     if (!isDivision && !isHovered) {
       return const SizedBox.shrink();
     }
 
-    final dt = DateTime.fromMillisecondsSinceEpoch(
-      timestamp[index] * 1000,
-    );
+    final dt = DateTime.fromMillisecondsSinceEpoch(timestamp[index] * 1000);
 
     final label =
         "${dt.day.toString().padLeft(2, '0')}/"
