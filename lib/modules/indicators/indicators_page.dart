@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/price_chart_container.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/price_range_filter_bar.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_layout.dart';
@@ -80,7 +81,27 @@ class IndicatorsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 🔹 FILTROS DO GRÁFICO
-                  const PriceFilterBar(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        // === Filtros Open/High/Low/Close (já existentes) ===
+                        Expanded(child: PriceFilterBar()),
+
+                        const SizedBox(width: 12),
+
+                        // === Filtros de Range (novo) ===
+                        PriceRangeFilterBar(
+                          selected: controller.currentRange,
+                          onSelected: (range) =>
+                              controller.setRange(context, range),
+                        ),
+                      ],
+                    ),
+                  ),
 
                   // 🔹 GRÁFICO
                   PriceChartContainer(

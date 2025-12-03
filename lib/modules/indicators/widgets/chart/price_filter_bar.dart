@@ -17,6 +17,7 @@ class PriceFilterBar extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
+    
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),

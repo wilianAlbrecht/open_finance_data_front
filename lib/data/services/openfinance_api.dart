@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 class OpenFinanceApi {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: "http://93.127.211.242:8081/api", // ajuste se necessário
+      baseUrl: "http://93.127.211.242:8081/api",
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 5),
     ),

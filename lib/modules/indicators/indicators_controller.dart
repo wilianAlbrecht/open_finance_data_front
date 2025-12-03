@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/price_range_filter_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -23,6 +24,9 @@ class IndicatorsController extends ChangeNotifier {
   List<double> close = [];
   List<double> volume = [];
   List<int> timestamp = [];
+
+  // Filtro de período
+  PriceRange currentRange = PriceRange.oneYear;
 
   bool showOpen = false;
   bool showHigh = false;
@@ -119,6 +123,64 @@ class IndicatorsController extends ChangeNotifier {
   void toggleClose() {
     showClose = !showClose;
     notifyListeners();
+  }
+
+  void setRange(BuildContext context, PriceRange range) {
+    if (currentRange == range) return;
+
+    currentRange = range;
+
+    if (currentSymbol != null && currentSymbol!.isNotEmpty) {
+      loadHistoryFiltered(context);
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> loadHistoryFiltered(BuildContext context) async {
+    if (currentSymbol == null || currentSymbol!.isEmpty) return;
+
+    try {
+      isLoading = true;
+      notifyListeners();
+
+      final api = context.read<OpenFinanceApi>();
+      final symbol = currentSymbol!;
+      final range = currentRange.apiRange;
+      final interval = currentRange.apiInterval;
+
+      // usa a mesma API, só adicionamos parâmetros
+      history = await api.getHistory(symbol, range: range, interval: interval);
+
+      if (history == null) {
+        errorMessage = "Erro ao filtrar histórico";
+        isLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      final data = HistoryData.fromJson(history!);
+
+      open = roundList(data.open);
+      high = roundList(data.high);
+      low = roundList(data.low);
+      close = roundList(data.close);
+      volume = roundList(data.volume);
+      timestamp = data.timestamp;
+
+      cachedChart = PriceChartStaticBuilder(
+        open: open,
+        high: high,
+        low: low,
+        close: close,
+        timestamp: timestamp,
+      ).build(context);
+    } catch (e) {
+      errorMessage = "Erro ao aplicar filtro";
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   /// Helpers
