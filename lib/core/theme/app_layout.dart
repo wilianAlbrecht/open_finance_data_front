@@ -26,8 +26,11 @@ class AppLayout {
   /// Padding grande (seções)
   static const EdgeInsets paddingLg = EdgeInsets.all(24);
 
-  // ======== MARGINS ========
+  /// Espaço reservado para os eixos do gráfico (direita / esquerda)
+  static const double axisLeftReserved = 58;
+  static const double axisRightReserved = 25;
 
+  // ======== MARGINS ========
   static const EdgeInsets marginSm = EdgeInsets.all(8);
   static const EdgeInsets marginMd = EdgeInsets.all(16);
   static const EdgeInsets marginLg = EdgeInsets.all(24);
@@ -35,26 +38,16 @@ class AppLayout {
   // ======== SHAPES UTILITÁRIAS ========
 
   /// Borda padrão leve
-  static BorderSide get defaultBorder => BorderSide(
-        color: Colors.black12,
-        width: 1,
-      );
+  static BorderSide get defaultBorder =>
+      BorderSide(color: Colors.black12, width: 1);
 
   /// Sombra leve universal (independente do tema)
   static const List<BoxShadow> shadowSm = [
-    BoxShadow(
-      color: Color(0x22000000),
-      blurRadius: 6,
-      offset: Offset(0, 3),
-    ),
+    BoxShadow(color: Color(0x22000000), blurRadius: 6, offset: Offset(0, 3)),
   ];
 
   /// Sombra média
   static const List<BoxShadow> shadowMd = [
-    BoxShadow(
-      color: Color(0x33000000),
-      blurRadius: 10,
-      offset: Offset(0, 4),
-    ),
+    BoxShadow(color: Color(0x33000000), blurRadius: 10, offset: Offset(0, 4)),
   ];
 }

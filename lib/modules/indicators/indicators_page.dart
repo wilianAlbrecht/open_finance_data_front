@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/price_chart_container.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_layout.dart';
@@ -9,9 +10,7 @@ import '../../../core/widgets/theme_toggle_button.dart';
 import 'indicators_controller.dart';
 import 'widgets/categories_placeholder.dart';
 import 'widgets/chart/price_filter_bar.dart';
-import 'widgets/chart/price_line_chart.dart';
 import 'widgets/search_bar.dart';
-
 
 class IndicatorsPage extends StatelessWidget {
   const IndicatorsPage({super.key});
@@ -30,9 +29,7 @@ class IndicatorsPage extends StatelessWidget {
           ),
         ),
         elevation: 0,
-        actions: const [
-          ThemeToggleButton(), 
-        ],
+        actions: const [ThemeToggleButton()],
       ),
 
       body: ListView(
@@ -86,17 +83,9 @@ class IndicatorsPage extends StatelessWidget {
                   const PriceFilterBar(),
 
                   // 🔹 GRÁFICO
-                  PriceLineChart(
-                    open: controller.open,
-                    high: controller.high,
-                    low: controller.low,
-                    close: controller.close,
-                    timestamp: controller.timestamp,
-
-                    showOpen: controller.showOpen,
-                    showHigh: controller.showHigh,
-                    showLow: controller.showLow,
-                    showClose: controller.showClose,
+                  PriceChartContainer(
+                    chart: controller.cachedChart!,
+                    series: controller.buildSeries(context),
                   ),
                 ],
               );

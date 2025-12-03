@@ -7,6 +7,8 @@ class AppChartTheme extends ThemeExtension<AppChartTheme> {
   final Color openColor;
   final Color highColor;
   final Color lowColor;
+  final Color axisLabelColor;
+  final Color axisLineColor;
 
   const AppChartTheme({
     required this.gridColor,
@@ -14,6 +16,8 @@ class AppChartTheme extends ThemeExtension<AppChartTheme> {
     required this.openColor,
     required this.highColor,
     required this.lowColor,
+    required this.axisLabelColor,
+    required this.axisLineColor,
   });
 
   // Light preset
@@ -23,6 +27,8 @@ class AppChartTheme extends ThemeExtension<AppChartTheme> {
     openColor: Colors.orange,
     highColor: Colors.green,
     lowColor: Colors.red,
+    axisLabelColor: AppColors.textLightSecondary,
+    axisLineColor: AppColors.dividerLight,
   );
 
   // Dark preset
@@ -32,6 +38,8 @@ class AppChartTheme extends ThemeExtension<AppChartTheme> {
     openColor: Colors.orange,
     highColor: Colors.green,
     lowColor: Colors.red,
+    axisLabelColor: AppColors.textDarkSecondary,
+    axisLineColor: AppColors.dividerDark,
   );
 
   @override
@@ -48,6 +56,8 @@ class AppChartTheme extends ThemeExtension<AppChartTheme> {
       openColor: openColor ?? this.openColor,
       highColor: highColor ?? this.highColor,
       lowColor: lowColor ?? this.lowColor,
+      axisLabelColor: axisLabelColor ?? this.axisLabelColor,
+      axisLineColor: axisLineColor ?? this.axisLineColor,
     );
   }
 
@@ -60,6 +70,8 @@ class AppChartTheme extends ThemeExtension<AppChartTheme> {
       openColor: Color.lerp(openColor, other.openColor, t)!,
       highColor: Color.lerp(highColor, other.highColor, t)!,
       lowColor: Color.lerp(lowColor, other.lowColor, t)!,
+      axisLabelColor: Color.lerp(axisLabelColor, other.axisLabelColor, t)!,
+      axisLineColor: Color.lerp(axisLineColor, other.axisLineColor, t)!,
     );
   }
 }

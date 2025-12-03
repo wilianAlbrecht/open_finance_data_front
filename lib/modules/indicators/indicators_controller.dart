@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import '../../data/models/history_data.dart';
 import '../../data/services/openfinance_api.dart';
+
+import './widgets/chart/price_chart_static_builder.dart';
+import './widgets/chart/price_chart_series_builder.dart';
 
 class IndicatorsController extends ChangeNotifier {
   bool isLoading = false;
@@ -12,7 +16,7 @@ class IndicatorsController extends ChangeNotifier {
   Map<String, dynamic>? fundamentals;
   Map<String, dynamic>? history;
 
-  //dados do histórico para o gráfico
+  // Dados do gráfico
   List<double> open = [];
   List<double> high = [];
   List<double> low = [];
@@ -23,7 +27,9 @@ class IndicatorsController extends ChangeNotifier {
   bool showOpen = false;
   bool showHigh = false;
   bool showLow = false;
-  bool showClose = true; // ativo por padrão
+  bool showClose = true;
+
+  LineChartData? cachedChart;
 
   Future<void> search(BuildContext context, String symbol) async {
     if (symbol.isEmpty) return;
@@ -37,29 +43,35 @@ class IndicatorsController extends ChangeNotifier {
     try {
       currentSymbol = symbol;
 
-      // CHAMADAS REAIS:
       fundamentals = await api.getFundamentals(symbol);
       history = await api.getHistory(symbol);
-
-      late final HistoryData data;
 
       if (history == null) {
         errorMessage = "Erro ao buscar histórico";
         isLoading = false;
         notifyListeners();
         return;
-      } else {
-        data = HistoryData.fromJson(history!);
       }
 
+      final data = HistoryData.fromJson(history!);
+
       open = roundList(data.open);
-      close = roundList(data.close);
       high = roundList(data.high);
       low = roundList(data.low);
+      close = roundList(data.close);
       volume = roundList(data.volume);
       timestamp = data.timestamp;
 
-      debugPrint("✔ Dados carregados para $symbol");
+      // Gera chart estático somente 1 vez
+      cachedChart = PriceChartStaticBuilder(
+        open: open,
+        high: high,
+        low: low,
+        close: close,
+        timestamp: timestamp,
+      ).build(context);
+
+      debugPrint("✔ Histórico carregado e gráfico gerado para $symbol");
 
       isLoading = false;
       notifyListeners();
@@ -70,6 +82,25 @@ class IndicatorsController extends ChangeNotifier {
     }
   }
 
+  /// Build dinâmico das séries (recebe o contexto atual)
+  List<LineChartBarData> buildSeries(BuildContext context) {
+    if (cachedChart == null) return [];
+
+    return PriceChartSeriesBuilder(
+      open: open,
+      high: high,
+      low: low,
+      close: close,
+    ).build(
+      context,
+      showOpen: showOpen,
+      showHigh: showHigh,
+      showLow: showLow,
+      showClose: showClose,
+    );
+  }
+
+  /// Toggles para atualizar as séries
   void toggleOpen() {
     showOpen = !showOpen;
     notifyListeners();
@@ -90,9 +121,8 @@ class IndicatorsController extends ChangeNotifier {
     notifyListeners();
   }
 
-  double round2(double value) {
-    return double.parse(value.toStringAsFixed(2));
-  }
+  /// Helpers
+  double round2(double value) => double.parse(value.toStringAsFixed(2));
 
   List<double> roundList(List<double> values) {
     return values.map((v) => round2(v)).toList();
