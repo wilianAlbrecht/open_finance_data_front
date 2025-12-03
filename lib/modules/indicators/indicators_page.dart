@@ -86,6 +86,7 @@ class IndicatorsPage extends StatelessWidget {
                   PriceChartContainer(
                     chart: controller.cachedChart!,
                     series: controller.buildSeries(context),
+                    timestamp: controller.timestamp,
                   ),
                 ],
               );

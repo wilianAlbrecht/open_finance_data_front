@@ -50,10 +50,14 @@ class PriceChartStaticBuilder {
       final base = value / pow(10, exp.floor());
       double niceBase;
 
-      if (base <= 1) niceBase = 1;
-      else if (base <= 2) niceBase = 2;
-      else if (base <= 5) niceBase = 5;
-      else niceBase = 10;
+      if (base <= 1)
+        niceBase = 1;
+      else if (base <= 2)
+        niceBase = 2;
+      else if (base <= 5)
+        niceBase = 5;
+      else
+        niceBase = 10;
 
       return niceBase * pow(10, exp.floor());
     }
@@ -119,12 +123,35 @@ class PriceChartStaticBuilder {
           ),
         ),
 
-        // EIXO X — NÃO ALTERADO
+        // ===== EIXO X — APENAS EXIBIR AS DATAS (intervalo intacto) =====
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            interval: (timestamp.length / 4).floorToDouble(),
-            getTitlesWidget: (value, meta) => const SizedBox.shrink(),
+            interval: (timestamp.length / 6).floorToDouble(),
+            getTitlesWidget: (value, meta) {
+              final index = value.toInt();
+
+              // fora dos limites → não exibe
+              if (index < 0 || index >= timestamp.length) {
+                return const SizedBox.shrink();
+              }
+
+              // formata a data
+              final dt = DateTime.fromMillisecondsSinceEpoch(
+                timestamp[index] * 1000,
+              );
+
+              final label =
+                  "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year.toString().substring(2)}"; ///
+
+              return Text(
+                label,
+                style: AppTextStyles.body.copyWith(
+                  fontSize: 10,
+                  color: chartTheme.axisLabelColor,
+                ),
+              );
+            },
           ),
         ),
 
@@ -135,9 +162,7 @@ class PriceChartStaticBuilder {
           ),
         ),
 
-        topTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
 
       borderData: FlBorderData(show: false),

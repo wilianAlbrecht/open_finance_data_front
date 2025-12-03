@@ -30,39 +30,55 @@ class PriceChartSeriesBuilder {
     final List<LineChartBarData> series = [];
 
     if (showClose) {
-      series.add(LineChartBarData(
-        spots: _spots(close),
-        color: chartTheme.closeColor,
-        isCurved: true,
-        barWidth: 2,
-      ));
+      series.add(
+        LineChartBarData(
+          spots: _spots(close),
+          color: chartTheme.closeColor,
+          isCurved: true,
+          barWidth: 2,
+          // preventCurveOverShooting: true, // <---
+          // isStrokeCapRound: false, // <---
+        ),
+      );
     }
 
     if (showOpen) {
-      series.add(LineChartBarData(
-        spots: _spots(open),
-        color: chartTheme.openColor,
-        isCurved: true,
-        barWidth: 2,
-      ));
+      series.add(
+        LineChartBarData(
+          spots: _spots(open),
+          color: chartTheme.openColor,
+          isCurved: true,
+          barWidth: 2,
+          // preventCurveOverShooting: true, // <---
+          // isStrokeCapRound: false, // <---
+        ),
+      );
     }
 
     if (showHigh) {
-      series.add(LineChartBarData(
-        spots: _spots(high),
-        color: chartTheme.highColor,
-        isCurved: true,
-        barWidth: 2,
-      ));
+      series.add(
+        LineChartBarData(
+          spots: _spots(high),
+          color: chartTheme.highColor,
+          isCurved: true,
+          barWidth: 2,
+          // preventCurveOverShooting: true, // <---
+          // isStrokeCapRound: false, // <---
+        ),
+      );
     }
 
     if (showLow) {
-      series.add(LineChartBarData(
-        spots: _spots(low),
-        color: chartTheme.lowColor,
-        isCurved: true,
-        barWidth: 2,
-      ));
+      series.add(
+        LineChartBarData(
+          spots: _spots(low),
+          color: chartTheme.lowColor,
+          isCurved: true,
+          barWidth: 2,
+          // preventCurveOverShooting: true, // <---
+          // isStrokeCapRound: false, // <---
+        ),
+      );
     }
 
     return series;
