@@ -52,29 +52,39 @@ class _PriceChartLayoutState extends State<PriceChartLayout> {
             touchCallback: (event, response) {
               if (!mounted) return;
 
+              // Se não há spots → limpar hover
               if (response == null ||
                   response.lineBarSpots == null ||
                   response.lineBarSpots!.isEmpty) {
-                setState(() => hoveredIndex = null);
+                if (mounted) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) setState(() => hoveredIndex = null);
+                  });
+                }
                 return;
               }
 
-              setState(() {
-                hoveredIndex = response.lineBarSpots!.first.x.toInt();
+              // Atualizar hover de forma segura
+              final index = response.lineBarSpots!.first.x.toInt();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) setState(() => hoveredIndex = index);
               });
             },
+
             touchTooltipData: LineTouchTooltipData(
               getTooltipColor: (_) => Colors.black.withOpacity(0.75),
               getTooltipItems: (touchedSpots) {
-                return touchedSpots.map(
-                  (spot) => LineTooltipItem(
-                    spot.y.toStringAsFixed(2),
-                    AppTextStyles.body.copyWith(
-                      color: spot.bar.color,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ).toList();
+                return touchedSpots
+                    .map(
+                      (spot) => LineTooltipItem(
+                        spot.y.toStringAsFixed(2),
+                        AppTextStyles.body.copyWith(
+                          color: spot.bar.color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                    .toList();
               },
             ),
           ),

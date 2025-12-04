@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/range_filter_bar.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/price_chart_builder.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,8 @@ class IndicatorsController extends ChangeNotifier {
 
   Map<String, dynamic>? fundamentals;
   Map<String, dynamic>? history;
+
+  ChartMode chartMode = ChartMode.price;
 
   // Dados do gráfico
   List<double> open = [];
@@ -83,7 +86,7 @@ class IndicatorsController extends ChangeNotifier {
   }
 
   // ============================================================
-  // REBUILD DO GRÁFICO (NOVA LÓGICA CENTRAL)
+  // REBUILD DO GRÁFICO
   // ============================================================
 
   void rebuildChart(BuildContext context) {
@@ -106,7 +109,7 @@ class IndicatorsController extends ChangeNotifier {
   }
 
   // ============================================================
-  // TOGGLES OHLC (agora chamam rebuildChart)
+  // TOGGLES OHLC
   // ============================================================
 
   void toggleOpen(BuildContext context) {
@@ -157,11 +160,7 @@ class IndicatorsController extends ChangeNotifier {
       final range = currentRange.apiRange;
       final interval = currentRange.apiInterval;
 
-      history = await api.getHistory(
-        symbol,
-        range: range,
-        interval: interval,
-      );
+      history = await api.getHistory(symbol, range: range, interval: interval);
 
       if (history == null) {
         errorMessage = "Erro ao filtrar histórico";
@@ -189,12 +188,18 @@ class IndicatorsController extends ChangeNotifier {
     }
   }
 
+  void setChartMode(ChartMode mode) {
+    if (chartMode == mode) return;
+
+    chartMode = mode;
+    notifyListeners();
+  }
+
   // ============================================================
   // HELPERS
   // ============================================================
 
-  double round2(double value) =>
-      double.parse(value.toStringAsFixed(2));
+  double round2(double value) => double.parse(value.toStringAsFixed(2));
 
   List<double> roundList(List<double> values) =>
       values.map((v) => round2(v)).toList();

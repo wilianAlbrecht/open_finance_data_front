@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/ohlc_filter_bar.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/price_chart_layout.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/range_filter_bar.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/volume/volume_chart_layout.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_layout.dart';
@@ -88,27 +90,57 @@ class IndicatorsPage extends StatelessWidget {
                     ),
                     child: Row(
                       children: [
-                        // === Filtros Open/High/Low/Close (já existentes) ===
+                        // OHLC Filters (esquerda)
                         Expanded(
-                          child: OhlcFilterBar(), // novo nome
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: const OhlcFilterBar(),
+                          ),
                         ),
-                        const SizedBox(width: 12),
 
-                        // === Filtros de Range (novo) ===
-                        RangeFilterBar(
-                          selected: controller.currentRange,
-                          onSelected: (range) =>
-                              controller.setRange(context, range),
+                        // Chart Mode Selector (CENTRO)
+                        Expanded(
+                          child: Center(
+                            child: ChartModeSelector(
+                              selected: controller.chartMode,
+                              onChanged: (mode) =>
+                                  controller.setChartMode(mode),
+                            ),
+                          ),
+                        ),
+
+                        // Range Filters (direita)
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: RangeFilterBar(
+                              selected: controller.currentRange,
+                              onSelected: (range) =>
+                                  controller.setRange(context, range),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
 
                   // 🔹 GRÁFICO
-                  PriceChartLayout(
-                    chart: controller.chartResult!.chart,
-                    series: controller.chartResult!.series,
-                    timestamp: controller.timestamp,
+                  IndexedStack(
+                    index: controller.chartMode == ChartMode.price ? 0 : 1,
+                    children: [
+                      // GRAFICO DE PREÇO
+                      PriceChartLayout(
+                        chart: controller.chartResult!.chart,
+                        series: controller.chartResult!.series,
+                        timestamp: controller.timestamp,
+                      ),
+
+                      // GRAFICO DE VOLUME
+                      VolumeChartLayout(
+                        volume: controller.volume,
+                        timestamp: controller.timestamp,
+                      ),
+                    ],
                   ),
                 ],
               );
