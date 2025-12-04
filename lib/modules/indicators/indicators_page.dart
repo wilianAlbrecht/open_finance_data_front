@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/price_chart_container.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/price_range_filter_bar.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/ohlc_filter_bar.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/price_chart_layout.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/range_filter_bar.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_layout.dart';
@@ -10,7 +11,6 @@ import '../../../../core/theme/themes/extensions/app_card_theme.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
 import 'indicators_controller.dart';
 import 'widgets/categories_placeholder.dart';
-import 'widgets/chart/price_filter_bar.dart';
 import 'widgets/search_bar.dart';
 
 class IndicatorsPage extends StatelessWidget {
@@ -89,12 +89,13 @@ class IndicatorsPage extends StatelessWidget {
                     child: Row(
                       children: [
                         // === Filtros Open/High/Low/Close (já existentes) ===
-                        Expanded(child: PriceFilterBar()),
-
+                        Expanded(
+                          child: OhlcFilterBar(), // novo nome
+                        ),
                         const SizedBox(width: 12),
 
                         // === Filtros de Range (novo) ===
-                        PriceRangeFilterBar(
+                        RangeFilterBar(
                           selected: controller.currentRange,
                           onSelected: (range) =>
                               controller.setRange(context, range),
@@ -104,9 +105,9 @@ class IndicatorsPage extends StatelessWidget {
                   ),
 
                   // 🔹 GRÁFICO
-                  PriceChartContainer(
-                    chart: controller.cachedChart!,
-                    series: controller.buildSeries(context),
+                  PriceChartLayout(
+                    chart: controller.chartResult!.chart,
+                    series: controller.chartResult!.series,
                     timestamp: controller.timestamp,
                   ),
                 ],

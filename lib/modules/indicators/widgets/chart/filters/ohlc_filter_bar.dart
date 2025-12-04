@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../core/theme/app_text_styles.dart';
+import '../../../indicators_controller.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../indicators_controller.dart';
-
-class PriceFilterBar extends StatelessWidget {
-  const PriceFilterBar({super.key});
+class OhlcFilterBar extends StatelessWidget {
+  const OhlcFilterBar({super.key});
 
   Widget _chip({
     required BuildContext context,
@@ -17,7 +16,6 @@ class PriceFilterBar extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
@@ -57,28 +55,31 @@ class PriceFilterBar extends StatelessWidget {
             label: "Open",
             active: controller.showOpen,
             color: AppColors.filterOpen,
-            onTap: controller.toggleOpen,
+            onTap: () => controller.toggleOpen(context),
           ),
+
           _chip(
             context: context,
             label: "High",
             active: controller.showHigh,
             color: AppColors.filterHigh,
-            onTap: controller.toggleHigh,
+            onTap: () => controller.toggleHigh(context),
           ),
+
           _chip(
             context: context,
             label: "Low",
             active: controller.showLow,
             color: AppColors.filterLow,
-            onTap: controller.toggleLow,
+            onTap: () => controller.toggleLow(context),
           ),
+
           _chip(
             context: context,
             label: "Close",
             active: controller.showClose,
             color: AppColors.filterClose,
-            onTap: controller.toggleClose,
+            onTap: () => controller.toggleClose(context),
           ),
         ],
       ),
