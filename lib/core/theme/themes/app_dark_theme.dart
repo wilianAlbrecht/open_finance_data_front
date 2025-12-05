@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/core/theme/app_layout.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_canvas_bar_theme.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_canvas_base_theme.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_canvas_line_theme.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_card_theme.dart';
 import 'package:open_finance_data_front/core/theme/themes/extensions/app_page_layout_theme.dart';
 
 import '../app_colors.dart';
-import 'extensions/app_card_theme.dart';
 import 'extensions/app_chart_theme.dart';
 import 'extensions/app_chip_theme.dart';
 
@@ -43,7 +46,15 @@ class AppDarkTheme {
       ),
 
       // Extensions
-      extensions: [AppChipTheme.dark, AppChartTheme.dark, AppCardTheme.dark, AppPageLayoutTheme.dark,],
+      extensions: [
+        AppChipTheme.dark,
+        AppChartTheme.dark,
+        AppPageLayoutTheme.dark,
+        AppCanvasBaseTheme.dark,
+        AppCanvasLineTheme.dark,
+        AppCanvasBarTheme.dark,
+        AppCardTheme.dark,
+      ],
     );
   }
 }
