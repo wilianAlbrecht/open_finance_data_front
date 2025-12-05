@@ -5,8 +5,8 @@ import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/p
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-import '../../data/models/history_data.dart';
-import '../../data/services/openfinance_api.dart';
+import '../../../data/models/history_data.dart';
+import '../../../data/services/history_service.dart';
 
 class IndicatorsController extends ChangeNotifier {
   bool isLoading = false;

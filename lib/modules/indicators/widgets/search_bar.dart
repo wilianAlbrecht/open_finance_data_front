@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/modules/indicators/controllers/financial_indicators_controller.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_spacing.dart';
@@ -6,7 +7,7 @@ import '../../../../core/theme/app_layout.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/themes/extensions/app_card_theme.dart';
 
-import '../indicators_controller.dart';
+import '../controllers/price_chart_controller.dart';
 
 class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({super.key});
@@ -22,6 +23,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     final value = controller.text.trim();
     if (value.isEmpty) return;
     context.read<IndicatorsController>().search(context, value);
+    context.read<FinancialIndicatorsController>().search(value);
   }
 
   @override

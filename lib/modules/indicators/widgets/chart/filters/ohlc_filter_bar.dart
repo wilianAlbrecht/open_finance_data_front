@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_text_styles.dart';
-import '../../../indicators_controller.dart';
+import '../../../controllers/price_chart_controller.dart';
 import 'package:provider/provider.dart';
 
 class OhlcFilterBar extends StatelessWidget {

@@ -10,10 +10,7 @@ class PriceChartResult {
   final LineChartData chart;
   final List<LineChartBarData> series;
 
-  PriceChartResult({
-    required this.chart,
-    required this.series,
-  });
+  PriceChartResult({required this.chart, required this.series});
 }
 
 class PriceChartBuilder {
@@ -41,7 +38,41 @@ class PriceChartBuilder {
   });
 
   // =====================================================
-  //              SERIES (OHLC)
+  // CLEAN INVALID DATA BY INDEX
+  // =====================================================
+
+  void cleanAllSeries() {
+    final int len = timestamp.length;
+    final List<int> remove = [];
+
+    for (int i = 0; i < len; i++) {
+      final o = open[i];
+      final h = high[i];
+      final l = low[i];
+      final c = close[i];
+
+      final invalid =
+          !o.isFinite || o <= 0 ||
+          !h.isFinite || h <= 0 ||
+          !l.isFinite || l <= 0 ||
+          !c.isFinite || c <= 0;
+
+      if (invalid) remove.add(i);
+    }
+
+    // Remove do fim para o começo
+    for (int i = remove.length - 1; i >= 0; i--) {
+      final idx = remove[i];
+      open.removeAt(idx);
+      high.removeAt(idx);
+      low.removeAt(idx);
+      close.removeAt(idx);
+      timestamp.removeAt(idx);
+    }
+  }
+
+  // =====================================================
+  // SERIES (OHLC)
   // =====================================================
 
   List<FlSpot> _spots(List<double> data) =>
@@ -51,7 +82,7 @@ class PriceChartBuilder {
     final chartTheme = Theme.of(context).extension<AppChartTheme>()!;
     final List<LineChartBarData> series = [];
 
-    if (showClose) {
+    if (showClose && close.isNotEmpty) {
       series.add(LineChartBarData(
         spots: _spots(close),
         color: chartTheme.closeColor,
@@ -60,7 +91,7 @@ class PriceChartBuilder {
       ));
     }
 
-    if (showOpen) {
+    if (showOpen && open.isNotEmpty) {
       series.add(LineChartBarData(
         spots: _spots(open),
         color: chartTheme.openColor,
@@ -69,7 +100,7 @@ class PriceChartBuilder {
       ));
     }
 
-    if (showHigh) {
+    if (showHigh && high.isNotEmpty) {
       series.add(LineChartBarData(
         spots: _spots(high),
         color: chartTheme.highColor,
@@ -78,7 +109,7 @@ class PriceChartBuilder {
       ));
     }
 
-    if (showLow) {
+    if (showLow && low.isNotEmpty) {
       series.add(LineChartBarData(
         spots: _spots(low),
         color: chartTheme.lowColor,
@@ -91,28 +122,30 @@ class PriceChartBuilder {
   }
 
   // =====================================================
-  //              STATIC PART (GRID / AXIS)
+  // STATIC (GRID + AXIS)
   // =====================================================
 
   LineChartData _buildStatic(BuildContext context) {
     final chartTheme = Theme.of(context).extension<AppChartTheme>()!;
 
-    // ======== MIN/MAX ========
-    final all = [...open, ...high, ...low, ...close];
-    double rawMin = all.reduce(min);
-    double rawMax = all.reduce(max);
-
-    final diff = rawMax - rawMin;
-    double paddedMin = rawMin - diff * 0.10;
-    double paddedMax = rawMax + diff * 0.10;
-
-    if (paddedMin == paddedMax) {
-      final pad = rawMin * 0.01 + 0.01;
-      paddedMin -= pad;
-      paddedMax += pad;
+    // ======= Garantia: NÃO usar valores inválidos =======
+    final allValues = [...open, ...high, ...low, ...close];
+    if (allValues.isEmpty) {
+      return LineChartData(minY: 0, maxY: 1);
     }
 
-    // ======== NICE STEP ========
+    double rawMin = allValues.reduce(min);
+    double rawMax = allValues.reduce(max);
+
+    final diff = rawMax - rawMin;
+    double paddedMin = rawMin - diff * 0.25;
+    double paddedMax = rawMax + diff * 0.25;
+
+    if (paddedMin == paddedMax) {
+      paddedMin -= 1;
+      paddedMax += 1;
+    }
+
     double niceStep(double value) {
       final exp = value == 0 ? 0 : log(value.abs()) / ln10;
       final base = value / pow(10, exp.floor());
@@ -130,16 +163,15 @@ class PriceChartBuilder {
       return niceBase * pow(10, exp.floor());
     }
 
-    const int ticksY = 6;
+    const ticksY = 6;
     final rawStep = (paddedMax - paddedMin) / (ticksY - 1);
     final stepY = niceStep(rawStep);
 
     final minY = (paddedMin / stepY).floor() * stepY;
     final maxY = (paddedMax / stepY).ceil() * stepY;
 
-    // ======== EIXO X ========
-    final stepX = (timestamp.length / 6).floor();
-    final tolerance = 0.3;
+    // ===== DATAS DIVIDIDAS EM 6 PARTES =====
+    final stepX = max(1, (timestamp.length / 6).floor());
 
     return LineChartData(
       minY: minY,
@@ -151,13 +183,7 @@ class PriceChartBuilder {
         getDrawingHorizontalLine: (_) =>
             FlLine(color: chartTheme.gridColor, strokeWidth: 1),
         getDrawingVerticalLine: (value) {
-          final tickPositions = List.generate(
-              timestamp.length, (i) => (i * stepX).toDouble());
-
-          final isTick = tickPositions.any(
-            (tick) => (value - tick).abs() < tolerance,
-          );
-
+          final isTick = (value % stepX).abs() < 0.3;
           return FlLine(
             color: isTick ? chartTheme.gridColor : Colors.transparent,
             strokeWidth: 1,
@@ -180,6 +206,7 @@ class PriceChartBuilder {
             ),
           ),
         ),
+
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
@@ -190,14 +217,14 @@ class PriceChartBuilder {
                 return const SizedBox.shrink();
               }
 
-              final dt =
-                  DateTime.fromMillisecondsSinceEpoch(timestamp[index] * 1000);
-
-              final label =
-                  "${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year.toString().substring(2)}";
+              final dt = DateTime.fromMillisecondsSinceEpoch(
+                timestamp[index] * 1000,
+              );
 
               return Text(
-                label,
+                "${dt.day.toString().padLeft(2, '0')}/"
+                "${dt.month.toString().padLeft(2, '0')}/"
+                "${dt.year.toString().substring(2)}",
                 style: AppTextStyles.body.copyWith(
                   fontSize: 10,
                   color: chartTheme.axisLabelColor,
@@ -206,30 +233,26 @@ class PriceChartBuilder {
             },
           ),
         ),
-        rightTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
-        topTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
+
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
       ),
 
       borderData: FlBorderData(show: false),
-      lineBarsData: const [], // será substituído mais tarde
+      lineBarsData: const [],
     );
   }
 
   // =====================================================
-  //                  FINAL RESULT
+  // FINAL RESULT
   // =====================================================
 
   PriceChartResult build(BuildContext context) {
+    cleanAllSeries(); // ← OBRIGATÓRIO e no começo
+
     final series = _buildSeries(context);
     final chart = _buildStatic(context);
 
-    return PriceChartResult(
-      chart: chart,
-      series: series,
-    );
+    return PriceChartResult(chart: chart, series: series);
   }
 }
