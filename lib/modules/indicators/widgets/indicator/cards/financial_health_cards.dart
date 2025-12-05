@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/indicator/CategorySection.dart';
-
 import '../indicator_card_base.dart';
 
 class FinancialHealthCards extends StatelessWidget {
@@ -15,17 +15,41 @@ class FinancialHealthCards extends StatelessWidget {
       title: "Saúde Financeira",
 
       primaryCards: [
-        IndicatorCardBase(title: "Dívida Total", value: data.totalDebt?.toStringAsFixed(0) ?? "--"),
-        IndicatorCardBase(title: "Dívida / Patrimônio", value: data.debtToEquity?.toStringAsFixed(2) ?? "--"),
-        IndicatorCardBase(title: "Caixa Total", value: data.totalCash?.toStringAsFixed(0) ?? "--"),
-        IndicatorCardBase(title: "Caixa por Ação", value: data.totalCashPerShare?.toStringAsFixed(2) ?? "--"),
+        IndicatorCardBase(
+          title: "Dívida Total",
+          value: Format.compact(data.totalDebt),
+        ),
+        IndicatorCardBase(
+          title: "Dívida / Patrimônio",
+          value: Format.number(data.debtToEquity),
+        ),
+        IndicatorCardBase(
+          title: "Caixa Total",
+          value: Format.compact(data.totalCash),
+        ),
+        IndicatorCardBase(
+          title: "Caixa por Ação",
+          value: Format.money(data.totalCashPerShare),
+        ),
       ],
 
       secondaryCards: [
-        IndicatorCardBase(title: "Fluxo de Caixa Operacional", value: data.operatingCashflow?.toStringAsFixed(0) ?? "--"),
-        IndicatorCardBase(title: "Fluxo de Caixa Livre", value: data.freeCashflow?.toStringAsFixed(0) ?? "--"),
-        IndicatorCardBase(title: "Lucro Bruto", value: data.grossProfits?.toStringAsFixed(0) ?? "--"),
-        IndicatorCardBase(title: "Receita Total", value: data.totalRevenue?.toStringAsFixed(0) ?? "--"),
+        IndicatorCardBase(
+          title: "Fluxo de Caixa Operacional",
+          value: Format.compact(data.operatingCashflow),
+        ),
+        IndicatorCardBase(
+          title: "Fluxo de Caixa Livre",
+          value: Format.compact(data.freeCashflow),
+        ),
+        IndicatorCardBase(
+          title: "Lucro Bruto",
+          value: Format.compact(data.grossProfits),
+        ),
+        IndicatorCardBase(
+          title: "Receita Total",
+          value: Format.compact(data.totalRevenue),
+        ),
       ],
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_page_layout_theme.dart';
 import 'package:open_finance_data_front/core/widgets/page_container.dart';
 import 'package:open_finance_data_front/modules/indicators/controllers/financial_indicators_controller.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
@@ -149,6 +150,25 @@ class IndicatorsPage extends StatelessWidget {
                 );
               },
             ),
+            //titulo
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: Theme.of(
+                    context,
+                  ).extension<AppPageLayoutTheme>()!.maxContentWidth,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 100),
+                  child: Text(
+                    "Indicadores Financeiros",
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.title.copyWith(fontSize: 22),
+                  ),
+                ),
+              ),
+            ),
+
             //indicadores financeiros
             Consumer<FinancialIndicatorsController>(
               builder: (context, indicators, _) {

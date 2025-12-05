@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/indicator/CategorySection.dart';
-
 import '../indicator_card_base.dart';
 
 class DividendsCards extends StatelessWidget {
@@ -17,38 +17,38 @@ class DividendsCards extends StatelessWidget {
       primaryCards: [
         IndicatorCardBase(
           title: "Dividend Yield",
-          value: "${((data.dividendYield ?? 0) * 100).toStringAsFixed(2)}%",
+          value: Format.percent(data.dividendYield),
         ),
         IndicatorCardBase(
           title: "Dividend TTM",
-          value: data.dividendTtm?.toStringAsFixed(2) ?? "--",
+          value: Format.money(data.dividendTtm),
         ),
         IndicatorCardBase(
           title: "Último Dividendo",
-          value: data.lastDividendValue?.toStringAsFixed(3) ?? "--",
+          value: Format.money(data.lastDividendValue),
         ),
         IndicatorCardBase(
           title: "Dividend Rate",
-          value: data.dividendRate?.toStringAsFixed(2) ?? "--",
+          value: Format.money(data.dividendRate),
         ),
       ],
 
       secondaryCards: [
         IndicatorCardBase(
           title: "Dividend Yield 5Y",
-          value: data.fiveYearAvgDividendYield?.toStringAsFixed(2) ?? "--",
+          value: Format.percent(data.fiveYearAvgDividendYield),
         ),
         IndicatorCardBase(
           title: "Dividend Yield TTM",
-          value: "${((data.dividendYieldTtm ?? 0) * 100).toStringAsFixed(2)}%",
+          value: Format.percent(data.dividendYieldTtm),
         ),
         IndicatorCardBase(
           title: "Ex-Dividend Date",
-          value: data.exDividendDate?.toStringAsFixed(0) ?? "--",
+          value: Format.date(data.exDividendDate),
         ),
         IndicatorCardBase(
-          title: "Last Dividend Date",
-          value: data.lastDividendDate?.toStringAsFixed(0) ?? "--",
+          title: "Última Data Dividendo",
+          value: Format.date(data.lastDividendDate),
         ),
       ],
     );
