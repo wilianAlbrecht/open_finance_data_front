@@ -62,7 +62,7 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     axisStrokeWidth: 1.2,
     gridStrokeWidth: 0.8,
 
-    labelStyle: TextStyle(fontSize: 11, color: Color(0xFF1A1A1A)),
+    labelStyle: TextStyle(fontSize: 11, color: Color(0xFF1E88E5)),
     tooltipStyle: TextStyle(
       fontSize: 12,
       fontWeight: FontWeight.bold,
@@ -82,7 +82,7 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     paddingLeft: 48,
     paddingRight: 20,
     paddingTop: 16,
-    paddingBottom: 28,
+    paddingBottom: 38,
 
     heightFactor: 0.60, // 60%
     widthFactor: 0.70, // 70%
@@ -96,7 +96,7 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     gridStrokeWidth: 0.8,
 
     labelStyle: TextStyle(fontSize: 11, color: Color(0xFFEAEAEA)),
-    tooltipStyle: TextStyle(fontSize: 12, color: Colors.black),
+    tooltipStyle: TextStyle(fontSize: 12, color: Color(0xFF1E88E5)),
 
     hoverLineColor: Color(0xFF64B5F6),
     hoverLineWidth: 1.5,

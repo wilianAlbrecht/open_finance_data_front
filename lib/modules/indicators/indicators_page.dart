@@ -128,28 +128,18 @@ class IndicatorsPage extends StatelessWidget {
                     ),
 
                     // 🔹 GRÁFICO
-                    IndexedStack(
-                      index: controller.chartMode == ChartMode.price ? 0 : 1,
-                      children: [
-                        // GRAFICO DE PREÇO
-                        CanvasChartWidget(
-                          open: controller.open,
-                          high: controller.high,
-                          low: controller.low,
-                          close: controller.close,
-                          timestamp: controller.timestamp,
-                          showOpen: controller.showOpen,
-                          showHigh: controller.showHigh,
-                          showLow: controller.showLow,
-                          showClose: controller.showClose,
-                        ),
-
-                        // GRAFICO DE VOLUME
-                        // VolumeChartLayout(
-                        //   volume: controller.volume,
-                        //   timestamp: controller.timestamp,
-                        // ),
-                      ],
+                    CanvasChartWidget(
+                      chartMode: controller.chartMode,
+                      open: controller.open,
+                      high: controller.high,
+                      low: controller.low,
+                      close: controller.close,
+                      volume: controller.volume,
+                      timestamp: controller.timestamp,
+                      showOpen: controller.showOpen,
+                      showHigh: controller.showHigh,
+                      showLow: controller.showLow,
+                      showClose: controller.showClose,
                     ),
                   ],
                 );

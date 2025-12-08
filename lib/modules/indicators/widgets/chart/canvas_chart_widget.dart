@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:open_finance_data_front/core/theme/themes/extensions/app_canvas_base_theme.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/canvas_line_chart_builder.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/canvas_line_painter.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/volume/canvas_mountain_chart_builder.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/volume/canvas_mountain_painter.dart';
 
 class CanvasChartWidget extends StatefulWidget {
-  final List<double> close;
+  final ChartMode chartMode;
+
   final List<double> open;
   final List<double> high;
   final List<double> low;
+  final List<double> close;
+  final List<double> volume;
   final List<int> timestamp;
 
   bool showOpen = false;
@@ -18,10 +24,12 @@ class CanvasChartWidget extends StatefulWidget {
 
   CanvasChartWidget({
     super.key,
+    required this.chartMode,
     required this.open,
     required this.high,
     required this.low,
     required this.close,
+    required this.volume,
     required this.timestamp,
     required this.showOpen,
     required this.showHigh,
@@ -37,105 +45,118 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
   int? hoveredIndex;
   Offset? hoveredPosition;
 
-  // -------------------------------
-  // HANDLE HOVER (WEB)
-  // -------------------------------
-  void _handleHover(PointerHoverEvent event, Size chartSize) {
-    setState(() {
-      hoveredPosition = event.localPosition;
-      // hoveredIndex será calculado pelo painter usando hoveredPosition
-    });
-  }
-
-  // -------------------------------
-  // HANDLE TAP (MOBILE)
-  // -------------------------------
-  void _handleTap(PointerDownEvent event, Size chartSize) {
-    setState(() {
-      hoveredPosition = event.localPosition;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final baseTheme = Theme.of(context).extension<AppCanvasBaseTheme>()!;
     final screen = MediaQuery.of(context).size;
 
-    // -------------------------------
-    // GRAPH SIZE FROM THE THEME
-    // -------------------------------
     final chartWidth = screen.width * baseTheme.widthFactor;
     final chartHeight = screen.height * baseTheme.heightFactor;
 
-    // -------------------------------
-    // BUILD CHART DATA (only line now)
-    // -------------------------------
-    final builder = CanvasLineChartBuilder(
-      open: widget.open,
-      high: widget.high,
-      low: widget.low,
-      close: widget.close,
-      showOpen: widget.showOpen,
-      showHigh: widget.showHigh,
-      showLow: widget.showLow,
-      showClose: widget.showClose,
-      timestamp: widget.timestamp,
-      paddingLeft: baseTheme.paddingLeft,
-      paddingRight: baseTheme.paddingRight,
-      paddingTop: baseTheme.paddingTop,
-      paddingBottom: baseTheme.paddingBottom,
-      chartWidth: chartWidth,
-      chartHeight: chartHeight,
-      openColor: baseTheme.openColor,
-      highColor: baseTheme.highColor,
-      lowColor: baseTheme.lowColor,
-      closeColor: baseTheme.closeColor,
-    );
+    dynamic chartData;
+    CustomPainter painter;
 
-    final data = builder.build();
+    // ===============================
+    // BUILD DATA BASEADO NO MODO
+    // ===============================
+    if (widget.chartMode == ChartMode.price) {
+      final builder = CanvasLineChartBuilder(
+        open: widget.open,
+        high: widget.high,
+        low: widget.low,
+        close: widget.close,
+        showOpen: widget.showOpen,
+        showHigh: widget.showHigh,
+        showLow: widget.showLow,
+        showClose: widget.showClose,
+        timestamp: widget.timestamp,
+        paddingLeft: baseTheme.paddingLeft,
+        paddingRight: baseTheme.paddingRight,
+        paddingTop: baseTheme.paddingTop,
+        paddingBottom: baseTheme.paddingBottom,
+        chartWidth: chartWidth,
+        chartHeight: chartHeight,
+        context: context,
+      );
 
-    // Verificar se há séries ativas
-    final hasActiveSeries = widget.showOpen || widget.showHigh || widget.showLow || widget.showClose;
+      chartData = builder.build();
 
-    // -------------------------------
-    // CREATE PAINTER
-    // -------------------------------
-    final painter = CanvasLinePainter(
-      data: data,
-      hoveredIndex: hasActiveSeries ? hoveredIndex : null,
-      hoveredPosition: hasActiveSeries ? hoveredPosition : null,
-      baseTheme: baseTheme,
-      timestamp: widget.timestamp,
-    );
+      painter = CanvasLinePainter(
+        data: chartData,
+        hoveredIndex: hoveredIndex,
+        hoveredPosition: hoveredPosition,
+        baseTheme: baseTheme,
+        timestamp: widget.timestamp,
+      );
+    } else {
+      final builder = CanvasMountainChartBuilder(
+        volume: widget.volume,
+        timestamp: widget.timestamp,
+        paddingLeft: baseTheme.paddingLeft,
+        paddingRight: baseTheme.paddingRight,
+        paddingTop: baseTheme.paddingTop,
+        paddingBottom: baseTheme.paddingBottom,
+        chartWidth: chartWidth,
+        chartHeight: chartHeight,
+      );
+
+      chartData = builder.build();
+
+      painter = CanvasMountainPainter(
+        data: chartData,
+        hoveredIndex: hoveredIndex,
+        hoveredPosition: hoveredPosition,
+        baseTheme: baseTheme,
+      );
+    }
+
+    // =====================================
+    // SÉRIES ATIVAS (APENAS PARA PREÇO)
+    // =====================================
+    final hasActiveSeries =
+        widget.showOpen ||
+        widget.showHigh ||
+        widget.showLow ||
+        widget.showClose;
 
     return SizedBox(
       width: chartWidth,
       height: chartHeight,
       child: MouseRegion(
         onExit: (_) {
-          if (hasActiveSeries) {
-            setState(() {
-              hoveredIndex = null;
-              hoveredPosition = null;
-            });
-          }
-        },
-        onHover: (event) {
-          if (!hasActiveSeries) return;
-          
-          final localPos = event.localPosition;
-          final index = _getNearestPointIndex(localPos, data);
-
+          if (!mounted) return;
           setState(() {
-            hoveredPosition = localPos;
+            hoveredIndex = null;
+            hoveredPosition = null;
+          });
+        },
+
+        // ======================================================
+        // HOVER — FUNCIONA EM AMBOS OS MODOS
+        // ======================================================
+        onHover: (event) {
+          if (widget.chartMode == ChartMode.price && !hasActiveSeries) return;
+
+          final pos = event.localPosition;
+          final index = _getNearestPointIndex(pos, chartData);
+
+          if (!mounted) return;
+          setState(() {
+            hoveredPosition = pos;
             hoveredIndex = index;
           });
         },
+
         child: Listener(
           onPointerDown: (event) {
-            if (hasActiveSeries) {
-              _handleTap(event, Size(chartWidth, chartHeight));
-            }
+            final pos = event.localPosition;
+            final index = _getNearestPointIndex(pos, chartData);
+
+            if (!mounted) return;
+            setState(() {
+              hoveredPosition = pos;
+              hoveredIndex = index;
+            });
           },
           child: CustomPaint(painter: painter),
         ),
@@ -143,18 +164,38 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
     );
   }
 
-  int? _getNearestPointIndex(Offset hoverPos, CanvasLineChartData data) {
-    double minDist = double.infinity;
-    int? nearestIndex;
+  // ============================================================
+  // CÁLCULO DO PONTO MAIS PRÓXIMO (PRICE OU VOLUME)
+  // ============================================================
+  int? _getNearestPointIndex(Offset hoverPos, dynamic data) {
+    late final List<Offset> points;
 
-    for (int i = 0; i < data.points.length; i++) {
-      final dx = (data.points[i].dx - hoverPos.dx).abs();
+    if (data is CanvasLineChartData) {
+      points = data.points; // gráfico de linha
+    } else if (data is CanvasMountainChartData) {
+      points = data.topPoints; // gráfico de volume
+    } else {
+      return null;
+    }
+
+    double minDist = double.infinity;
+    int? nearest;
+
+    for (int i = 0; i < points.length; i++) {
+      final dx = (points[i].dx - hoverPos.dx).abs();
       if (dx < minDist) {
         minDist = dx;
-        nearestIndex = i;
+        nearest = i;
       }
     }
 
-    return nearestIndex;
+    return nearest;
+  }
+
+  @override
+  void dispose() {
+    hoveredIndex = null;
+    hoveredPosition = null;
+    super.dispose();
   }
 }

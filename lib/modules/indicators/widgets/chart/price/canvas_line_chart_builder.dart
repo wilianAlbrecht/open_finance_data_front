@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_chart_theme.dart';
 
 class TooltipSeries {
   final String label;
@@ -19,7 +20,7 @@ class CanvasLineChartData {
   final List<Offset> lowPoints;
   final List<Offset> closePoints;
 
-  final List<Offset> points; // compatível com código antigo
+  final List<Offset> points; // referência principal usada pelo hover
 
   final double chartLeft;
   final double chartRight;
@@ -66,6 +67,7 @@ class CanvasLineChartData {
 }
 
 class CanvasLineChartBuilder {
+  final BuildContext context;
   final List<double> open;
   final List<double> high;
   final List<double> low;
@@ -86,10 +88,6 @@ class CanvasLineChartBuilder {
   final double chartWidth;
   final double chartHeight;
 
-  final Color openColor;
-  final Color highColor;
-  final Color lowColor;
-  final Color closeColor;
 
   CanvasLineChartBuilder({
     required this.open,
@@ -107,15 +105,14 @@ class CanvasLineChartBuilder {
     required this.paddingBottom,
     required this.chartWidth,
     required this.chartHeight,
-    required this.openColor,
-    required this.highColor,
-    required this.lowColor,
-    required this.closeColor,
+    required this.context,
   });
 
   CanvasLineChartData build() {
+  final chartTheme = Theme.of(context).extension<AppChartTheme>()!;
+
     // -------------------------------------------------
-    // 1. CALCULAR RANGE
+    // 1. CALCULAR RANGE REAL
     // -------------------------------------------------
     double minValue = double.infinity;
     double maxValue = double.negativeInfinity;
@@ -133,33 +130,18 @@ class CanvasLineChartBuilder {
     include(low, showLow);
     include(close, showClose);
 
-    // Se nenhuma série estiver ativa, usar valores padrão para manter o grid visível
+    // fallback caso tudo esteja desativado
     if (minValue == double.infinity || maxValue == double.negativeInfinity) {
-      // Usar valores padrão baseados em todas as séries para calcular o range
-      double fallbackMin = double.infinity;
-      double fallbackMax = double.negativeInfinity;
-      
-      for (final v in [...open, ...high, ...low, ...close]) {
-        if (v < fallbackMin) fallbackMin = v;
-        if (v > fallbackMax) fallbackMax = v;
-      }
-      
-      if (fallbackMin != double.infinity && fallbackMax != double.negativeInfinity) {
-        minValue = fallbackMin;
-        maxValue = fallbackMax;
-      } else {
-        // Fallback absoluto se não houver dados
-        minValue = 0;
-        maxValue = 100;
-      }
+      minValue = close.reduce(min);
+      maxValue = close.reduce(max);
     }
 
-    // padding vertical extra
-    final originalRange = maxValue - minValue;
+    // padding vertical
+    final range0 = maxValue - minValue;
     final paddingFactor = 0.15;
 
-    minValue -= originalRange * paddingFactor;
-    maxValue += originalRange * paddingFactor;
+    minValue -= range0 * paddingFactor;
+    maxValue += range0 * paddingFactor;
 
     final range = maxValue - minValue;
 
@@ -180,16 +162,17 @@ class CanvasLineChartBuilder {
     }
 
     // -------------------------------------------------
-    // 3. PONTOS
+    // 3. PONTOS DE TODAS AS SÉRIES
     // -------------------------------------------------
     final count = close.length;
     final dx = count > 1 ? usableWidth / (count - 1) : 0.0;
 
     List<Offset> buildPoints(List<double> series) {
       return List.generate(series.length, (i) {
-        final x = chartLeft + i * dx;
-        final y = valueToY(series[i]);
-        return Offset(x, y);
+        return Offset(
+          chartLeft + i * dx,
+          valueToY(series[i]),
+        );
       });
     }
 
@@ -197,6 +180,10 @@ class CanvasLineChartBuilder {
     final highPoints = showHigh ? buildPoints(high) : <Offset>[];
     final lowPoints = showLow ? buildPoints(low) : <Offset>[];
     final closePoints = showClose ? buildPoints(close) : <Offset>[];
+
+    // série para hover base
+    final List<Offset> basePoints =
+        closePoints.isNotEmpty ? closePoints : buildPoints(close);
 
     // -------------------------------------------------
     // 4. GRID
@@ -214,7 +201,7 @@ class CanvasLineChartBuilder {
     final yLabels = gridValues.map((v) => v.toStringAsFixed(2)).toList();
 
     // -------------------------------------------------
-    // 5. LABELS EIXO X
+    // 5. LABELS DO EIXO X
     // -------------------------------------------------
     const labelCount = 6;
     final labelX = <double>[];
@@ -239,61 +226,29 @@ class CanvasLineChartBuilder {
     }).toList();
 
     // -------------------------------------------------
-    // 6. TOOLTIP SERIES (para hover)
+    // 6. SÉRIES DO TOOLTIP (CORES DO TEMA)
     // -------------------------------------------------
     final tooltipSeries = <TooltipSeries>[];
 
     if (showOpen) {
       tooltipSeries.add(
-        TooltipSeries(
-          label: "Open",
-          color: openColor,
-          values: open,
-        ),
+        TooltipSeries(label: "Open", color: chartTheme.openColor, values: open),
       );
     }
     if (showHigh) {
       tooltipSeries.add(
-        TooltipSeries(
-          label: "High",
-          color: highColor,
-          values: high,
-        ),
+        TooltipSeries(label: "High", color: chartTheme.highColor, values: high),
       );
     }
     if (showLow) {
       tooltipSeries.add(
-        TooltipSeries(
-          label: "Low",
-          color: lowColor,
-          values: low,
-        ),
+        TooltipSeries(label: "Low", color: chartTheme.lowColor, values: low),
       );
     }
     if (showClose) {
       tooltipSeries.add(
-        TooltipSeries(
-          label: "Close",
-          color: closeColor,
-          values: close,
-        ),
+        TooltipSeries(label: "Close", color: chartTheme.closeColor, values: close),
       );
-    }
-
-    final List<Offset> basePoints;
-
-    if (closePoints.isNotEmpty) {
-      basePoints = closePoints;
-    } else if (openPoints.isNotEmpty) {
-      basePoints = openPoints;
-    } else if (highPoints.isNotEmpty) {
-      basePoints = highPoints;
-    } else if (lowPoints.isNotEmpty) {
-      basePoints = lowPoints;
-    } else {
-      // Se nenhuma série estiver ativa, criar pontos base apenas para posicionamento X do hover
-      // Usa close para calcular posições X, mas não desenha a linha
-      basePoints = buildPoints(close);
     }
 
     return CanvasLineChartData(
@@ -301,7 +256,7 @@ class CanvasLineChartBuilder {
       highPoints: highPoints,
       lowPoints: lowPoints,
       closePoints: closePoints,
-      // points: closePoints,
+      points: basePoints,
       chartLeft: chartLeft,
       chartRight: chartRight,
       chartTop: chartTop,
@@ -316,7 +271,6 @@ class CanvasLineChartBuilder {
       xLabels: xLabels,
       fullXLabels: fullXLabels,
       tooltipSeries: tooltipSeries,
-      points: basePoints,
     );
   }
 }
