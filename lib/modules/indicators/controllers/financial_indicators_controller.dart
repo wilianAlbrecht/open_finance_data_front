@@ -3,7 +3,6 @@ import '../../../data/models/indicators_model.dart';
 import '../../../data/services/indicators_service.dart';
 
 class FinancialIndicatorsController extends ChangeNotifier {
-
   final IndicatorsService service = IndicatorsService();
 
   bool isLoading = false;

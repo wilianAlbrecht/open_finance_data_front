@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/core/theme/themes/extensions/app_page_layout_theme.dart';
 import 'package:open_finance_data_front/core/widgets/page_container.dart';
 import 'package:open_finance_data_front/modules/indicators/controllers/financial_indicators_controller.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/canvas_chart_widget.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/ohlc_filter_bar.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/range_filter_bar.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/price_chart_layout.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/volume/volume_chart_layout.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/indicator/indicator_cards.dart';
 import 'package:provider/provider.dart';
 
@@ -112,18 +110,6 @@ class IndicatorsPage extends StatelessWidget {
                               ),
                             ),
                           ),
-
-                          // Range Filters (direita)
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: RangeFilterBar(
-                                selected: controller.currentRange,
-                                onSelected: (range) =>
-                                    controller.setRange(context, range),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -133,17 +119,16 @@ class IndicatorsPage extends StatelessWidget {
                       index: controller.chartMode == ChartMode.price ? 0 : 1,
                       children: [
                         // GRAFICO DE PREÇO
-                        PriceChartLayout(
-                          chart: controller.chartResult!.chart,
-                          series: controller.chartResult!.series,
+                        CanvasChartWidget(
+                          close: controller.close,
                           timestamp: controller.timestamp,
                         ),
 
                         // GRAFICO DE VOLUME
-                        VolumeChartLayout(
-                          volume: controller.volume,
-                          timestamp: controller.timestamp,
-                        ),
+                        // VolumeChartLayout(
+                        //   volume: controller.volume,
+                        //   timestamp: controller.timestamp,
+                        // ),
                       ],
                     ),
                   ],

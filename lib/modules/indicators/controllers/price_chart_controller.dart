@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/range_filter_bar.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/price_chart_builder.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -36,7 +35,7 @@ class IndicatorsController extends ChangeNotifier {
   bool showClose = true;
 
   // Resultado final do builder
-  PriceChartResult? chartResult;
+  // PriceChartResult? chartResult;
 
   // ============================================================
   // SEARCH PRINCIPAL
@@ -92,19 +91,19 @@ class IndicatorsController extends ChangeNotifier {
   void rebuildChart(BuildContext context) {
     if (timestamp.isEmpty) return;
 
-    final builder = PriceChartBuilder(
-      open: open,
-      high: high,
-      low: low,
-      close: close,
-      timestamp: timestamp,
-      showOpen: showOpen,
-      showHigh: showHigh,
-      showLow: showLow,
-      showClose: showClose,
-    );
+    // final builder = PriceChartBuilder(
+    //   open: open,
+    //   high: high,
+    //   low: low,
+    //   close: close,
+    //   timestamp: timestamp,
+    //   showOpen: showOpen,
+    //   showHigh: showHigh,
+    //   showLow: showLow,
+    //   showClose: showClose,
+    // );
 
-    chartResult = builder.build(context);
+    // chartResult = builder.build(context);
     notifyListeners();
   }
 
@@ -194,7 +193,6 @@ class IndicatorsController extends ChangeNotifier {
     chartMode = mode;
     notifyListeners();
   }
-
   // ============================================================
   // HELPERS
   // ============================================================

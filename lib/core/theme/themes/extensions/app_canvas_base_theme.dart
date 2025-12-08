@@ -8,7 +8,7 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
   final double gridStrokeWidth;
 
   // ----- Estilos de texto -----
-  final TextStyle labelStyle; 
+  final TextStyle labelStyle;
   final TextStyle tooltipStyle;
 
   // ----- Hover -----
@@ -22,6 +22,9 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
   final double paddingRight;
   final double paddingTop;
   final double paddingBottom;
+
+  final double heightFactor; // porcentagem da altura da tela
+  final double widthFactor; // porcentagem da largura da tela
 
   const AppCanvasBaseTheme({
     required this.axisColor,
@@ -38,6 +41,8 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     required this.paddingRight,
     required this.paddingTop,
     required this.paddingBottom,
+    required this.heightFactor,
+    required this.widthFactor,
   });
 
   // ---------------- LIGHT ----------------
@@ -48,7 +53,11 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     gridStrokeWidth: 0.8,
 
     labelStyle: TextStyle(fontSize: 11, color: Color(0xFF1A1A1A)),
-    tooltipStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+    tooltipStyle: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
 
     hoverLineColor: Color(0xFF1E88E5),
     hoverLineWidth: 1.5,
@@ -59,6 +68,9 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     paddingRight: 20,
     paddingTop: 16,
     paddingBottom: 28,
+
+    heightFactor: 0.60, // 60%
+    widthFactor: 0.70, // 70%
   );
 
   // ---------------- DARK ----------------
@@ -80,6 +92,9 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     paddingRight: 20,
     paddingTop: 16,
     paddingBottom: 28,
+
+    heightFactor: 0.60, // 60%
+    widthFactor: 0.70, // 70%
   );
 
   @override
@@ -114,6 +129,8 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
       paddingRight: paddingRight ?? this.paddingRight,
       paddingTop: paddingTop ?? this.paddingTop,
       paddingBottom: paddingBottom ?? this.paddingBottom,
+      heightFactor: heightFactor ?? this.heightFactor,
+      widthFactor: widthFactor ?? this.widthFactor,
     );
   }
 

@@ -23,7 +23,7 @@ class AppPageLayoutTheme extends ThemeExtension<AppPageLayoutTheme> {
 
   // Tema para modo escuro
   static const AppPageLayoutTheme dark = AppPageLayoutTheme(
-    maxContentWidth: 1600,
+    maxContentWidth: 1500,
     pagePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     centerContent: true,
   );
