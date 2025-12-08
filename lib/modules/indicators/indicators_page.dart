@@ -5,6 +5,7 @@ import 'package:open_finance_data_front/modules/indicators/controllers/financial
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/canvas_chart_widget.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/ohlc_filter_bar.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/range_filter_bar.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/indicator/indicator_cards.dart';
 import 'package:provider/provider.dart';
 
@@ -110,6 +111,18 @@ class IndicatorsPage extends StatelessWidget {
                               ),
                             ),
                           ),
+
+                          // Range Filter Bar (direita)
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: RangeFilterBar(
+                                selected: controller.currentRange,
+                                onSelected: (range) =>
+                                    controller.setRange(context, range),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -120,8 +133,15 @@ class IndicatorsPage extends StatelessWidget {
                       children: [
                         // GRAFICO DE PREÇO
                         CanvasChartWidget(
+                          open: controller.open,
+                          high: controller.high,
+                          low: controller.low,
                           close: controller.close,
                           timestamp: controller.timestamp,
+                          showOpen: controller.showOpen,
+                          showHigh: controller.showHigh,
+                          showLow: controller.showLow,
+                          showClose: controller.showClose,
                         ),
 
                         // GRAFICO DE VOLUME

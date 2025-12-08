@@ -6,20 +6,27 @@ import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/c
 
 class CanvasChartWidget extends StatefulWidget {
   final List<double> close;
+  final List<double> open;
+  final List<double> high;
+  final List<double> low;
   final List<int> timestamp;
 
-  // Preparado para futuro
-  final List<double>? open;
-  final List<double>? high;
-  final List<double>? low;
+  bool showOpen = false;
+  bool showHigh = false;
+  bool showLow = false;
+  bool showClose = true;
 
-  const CanvasChartWidget({
+  CanvasChartWidget({
     super.key,
+    required this.open,
+    required this.high,
+    required this.low,
     required this.close,
     required this.timestamp,
-    this.open,
-    this.high,
-    this.low,
+    required this.showOpen,
+    required this.showHigh,
+    required this.showLow,
+    required this.showClose,
   });
 
   @override
@@ -64,26 +71,39 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
     // BUILD CHART DATA (only line now)
     // -------------------------------
     final builder = CanvasLineChartBuilder(
+      open: widget.open,
+      high: widget.high,
+      low: widget.low,
       close: widget.close,
+      showOpen: widget.showOpen,
+      showHigh: widget.showHigh,
+      showLow: widget.showLow,
+      showClose: widget.showClose,
       timestamp: widget.timestamp,
-      // open/high/low serão usados no futuro
       paddingLeft: baseTheme.paddingLeft,
       paddingRight: baseTheme.paddingRight,
       paddingTop: baseTheme.paddingTop,
       paddingBottom: baseTheme.paddingBottom,
       chartWidth: chartWidth,
       chartHeight: chartHeight,
+      openColor: baseTheme.openColor,
+      highColor: baseTheme.highColor,
+      lowColor: baseTheme.lowColor,
+      closeColor: baseTheme.closeColor,
     );
 
     final data = builder.build();
+
+    // Verificar se há séries ativas
+    final hasActiveSeries = widget.showOpen || widget.showHigh || widget.showLow || widget.showClose;
 
     // -------------------------------
     // CREATE PAINTER
     // -------------------------------
     final painter = CanvasLinePainter(
       data: data,
-      hoveredIndex: hoveredIndex,
-      hoveredPosition: hoveredPosition,
+      hoveredIndex: hasActiveSeries ? hoveredIndex : null,
+      hoveredPosition: hasActiveSeries ? hoveredPosition : null,
       baseTheme: baseTheme,
       timestamp: widget.timestamp,
     );
@@ -93,12 +113,16 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
       height: chartHeight,
       child: MouseRegion(
         onExit: (_) {
-          setState(() {
-            hoveredIndex = null;
-            hoveredPosition = null;
-          });
+          if (hasActiveSeries) {
+            setState(() {
+              hoveredIndex = null;
+              hoveredPosition = null;
+            });
+          }
         },
         onHover: (event) {
+          if (!hasActiveSeries) return;
+          
           final localPos = event.localPosition;
           final index = _getNearestPointIndex(localPos, data);
 
@@ -109,7 +133,9 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
         },
         child: Listener(
           onPointerDown: (event) {
-            _handleTap(event, Size(chartWidth, chartHeight));
+            if (hasActiveSeries) {
+              _handleTap(event, Size(chartWidth, chartHeight));
+            }
           },
           child: CustomPaint(painter: painter),
         ),

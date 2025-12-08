@@ -17,6 +17,12 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
   final Color hoverPointColor;
   final double hoverPointRadius;
 
+  // ----- Cores das séries -----
+  final Color openColor;
+  final Color highColor;
+  final Color lowColor;
+  final Color closeColor;
+
   // ----- Layout comum -----
   final double paddingLeft;
   final double paddingRight;
@@ -37,6 +43,10 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     required this.hoverLineWidth,
     required this.hoverPointColor,
     required this.hoverPointRadius,
+    required this.openColor,
+    required this.highColor,
+    required this.lowColor,
+    required this.closeColor,
     required this.paddingLeft,
     required this.paddingRight,
     required this.paddingTop,
@@ -64,6 +74,11 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     hoverPointColor: Color(0xFF1E88E5),
     hoverPointRadius: 4,
 
+    openColor: Color(0xFFFBC02D),
+    highColor: Color(0xFF4CAF50),
+    lowColor: Color(0xFFE53935),
+    closeColor: Color(0xFF1E88E5),
+
     paddingLeft: 48,
     paddingRight: 20,
     paddingTop: 16,
@@ -88,6 +103,11 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     hoverPointColor: Color(0xFF64B5F6),
     hoverPointRadius: 4,
 
+    openColor: Color(0xFFFBC02D),
+    highColor: Color(0xFF4CAF50),
+    lowColor: Color(0xFFE53935),
+    closeColor: Color(0xFF1E88E5),
+
     paddingLeft: 48,
     paddingRight: 20,
     paddingTop: 16,
@@ -109,6 +129,10 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
     double? hoverLineWidth,
     Color? hoverPointColor,
     double? hoverPointRadius,
+    Color? openColor,
+    Color? highColor,
+    Color? lowColor,
+    Color? closeColor,
     double? paddingLeft,
     double? paddingRight,
     double? paddingTop,
@@ -125,6 +149,10 @@ class AppCanvasBaseTheme extends ThemeExtension<AppCanvasBaseTheme> {
       hoverLineWidth: hoverLineWidth ?? this.hoverLineWidth,
       hoverPointColor: hoverPointColor ?? this.hoverPointColor,
       hoverPointRadius: hoverPointRadius ?? this.hoverPointRadius,
+      openColor: openColor ?? this.openColor,
+      highColor: highColor ?? this.highColor,
+      lowColor: lowColor ?? this.lowColor,
+      closeColor: closeColor ?? this.closeColor,
       paddingLeft: paddingLeft ?? this.paddingLeft,
       paddingRight: paddingRight ?? this.paddingRight,
       paddingTop: paddingTop ?? this.paddingTop,
