@@ -27,37 +27,19 @@ class PriceCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final mainItems = [
       IndicatorCompactItem(label: "Preço Atual", value: fmt(data.currentPrice)),
-      IndicatorCompactItem(
-        label: "Previous Close",
-        value: fmt(data.previousClose),
-      ),
-      IndicatorCompactItem(
-        label: "52w High",
-        value: fmt(data.fiftyTwoWeekHigh),
-      ),
+      IndicatorCompactItem(label: "Previous Close", value: fmt(data.previousClose),),
+      IndicatorCompactItem(label: "52w High", value: fmt(data.fiftyTwoWeekHigh),),
       IndicatorCompactItem(label: "52w Low", value: fmt(data.fiftyTwoWeekLow)),
-      IndicatorCompactItem(label: "Volume", value: fmtCompact(data.volume)),
-      IndicatorCompactItem(
-        label: "Avg Volume",
-        value: fmtCompact(data.averageVolume),
-      ),
-      IndicatorCompactItem(
-        label: "Market Cap",
-        value: fmtCompact(data.marketCap),
-      ),
-      IndicatorCompactItem(label: "Beta", value: fmt(data.beta)),
     ];
 
     final advancedItems = [
+      IndicatorCompactItem(label: "Volume", value: fmtCompact(data.volume)),
+      IndicatorCompactItem(label: "Avg Volume", value: fmtCompact(data.averageVolume),),
+      IndicatorCompactItem(label: "Market Cap", value: fmtCompact(data.marketCap),),
+      IndicatorCompactItem(label: "Beta", value: fmt(data.beta)),
       IndicatorCompactItem(label: "Price/Sales", value: fmt(data.priceToSales)),
-      IndicatorCompactItem(
-        label: "Enterprise Value",
-        value: fmtCompact(data.enterpriseValue),
-      ),
-      IndicatorCompactItem(
-        label: "EV / Revenue",
-        value: fmt(data.enterpriseToRevenue),
-      ),
+      IndicatorCompactItem(label: "Enterprise Value", value: fmtCompact(data.enterpriseValue),),
+      IndicatorCompactItem(label: "EV / Revenue",value: fmt(data.enterpriseToRevenue),),
     ];
 
     return Column(

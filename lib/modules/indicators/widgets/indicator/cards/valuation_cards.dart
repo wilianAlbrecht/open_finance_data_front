@@ -28,26 +28,13 @@ class ValuationCards extends StatelessWidget {
     final mainItems = [
       IndicatorCompactItem(label: "P/E", value: fmt(data.priceToEarnings)),
       IndicatorCompactItem(label: "P/B", value: fmt(data.priceToBook)),
-      IndicatorCompactItem(
-        label: "Earnings Yield",
-        value: fmtPct(data.earningsYield), // AGORA CORRETO
-      ),
-      IndicatorCompactItem(label: "PEG Ratio", value: fmt(data.pegRatio)),
-    ];
+      IndicatorCompactItem(label: "Earnings Yield", value: fmtPct(data.earningsYield),),
+      IndicatorCompactItem(label: "PEG Ratio", value: fmt(data.pegRatio)),];
 
     final advancedItems = [
-      IndicatorCompactItem(
-        label: "EV / Revenue",
-        value: fmt(data.enterpriseToRevenue),
-      ),
-      IndicatorCompactItem(
-        label: "EV / EBITDA",
-        value: fmt(data.enterpriseToEbitda),
-      ),
-      IndicatorCompactItem(
-        label: "Price/Sales",
-        value: fmt(data.priceToSales),
-      ),
+      IndicatorCompactItem(label: "EV / Revenue", value: fmt(data.enterpriseToRevenue),),
+      IndicatorCompactItem(label: "EV / EBITDA", value: fmt(data.enterpriseToEbitda),),
+      IndicatorCompactItem(label: "Price/Sales", value: fmt(data.priceToSales),),
     ];
 
     return Column(

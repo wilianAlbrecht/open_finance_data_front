@@ -35,13 +35,13 @@ class DividendsCards extends StatelessWidget {
         value: fmtPct(data.dividendYieldTtm),
       ),
       IndicatorCompactItem(label: "Dividend TTM", value: fmt(data.dividendTtm)),
-    ];
-
-    final advancedItems = [
       IndicatorCompactItem(
         label: "Último Dividendo",
         value: fmt(data.lastDividendValue),
       ),
+    ];
+
+    final advancedItems = [
       IndicatorCompactItem(
         label: "5Y Avg Yield",
         value: fmtPct(data.fiveYearAvgDividendYield),
