@@ -37,27 +37,29 @@ class IndicatorsPage extends StatelessWidget {
         actions: const [ThemeToggleButton()],
       ),
 
+      // IMPORTANTÍSSIMO →
+      // Agora o Theme interno foi removido completamente.
+      // PageContainer usa o tema global (fullWidth = true).
       body: PageContainer(
-        child: ListView(
-          padding: EdgeInsets.zero, // remove padding padrão
-          children: [
-            // ========= SEARCH BAR =========
-            const SearchBarWidget(),
+        child: Consumer2<IndicatorsController, FinancialIndicatorsController>(
+          builder: (context, chartController, indicatorsController, _) {
+            final isWide = MediaQuery.of(context).size.width > 1100;
 
-            // ========= CONSUMER PRINCIPAL =========
-            Consumer<IndicatorsController>(
-              builder: (context, controller, _) {
-                // ===== LOADING =====
-                if (controller.isLoading) {
-                  return Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
-                }
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                const SearchBarWidget(),
 
-                // ===== NENHUM ATIVO CARREGADO =====
-                if (controller.close.isEmpty) {
-                  return Container(
+                // LOADING
+                if (chartController.isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(AppSpacing.lg),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+
+                // NENHUM RESULTADO
+                if (!chartController.isLoading && chartController.close.isEmpty)
+                  Container(
                     height: 200,
                     margin: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.md,
@@ -78,121 +80,219 @@ class IndicatorsPage extends StatelessWidget {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                  );
-                }
-
-                // ===== RESULTADO CARREGADO =====
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 🔹 FILTROS DO GRÁFICO
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        children: [
-                          // OHLC Filters (esquerda)
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: const OhlcFilterBar(),
-                            ),
-                          ),
-
-                          // Chart Mode Selector (CENTRO)
-                          Expanded(
-                            child: Center(
-                              child: ChartModeSelector(
-                                selected: controller.chartMode,
-                                onChanged: (mode) =>
-                                    controller.setChartMode(mode),
-                              ),
-                            ),
-                          ),
-
-                          // Range Filter Bar (direita)
-                          Expanded(
-                            child: Align(
-                              alignment: Alignment.centerRight,
-                              child: RangeFilterBar(
-                                selected: controller.currentRange,
-                                onSelected: (range) =>
-                                    controller.setRange(context, range),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // 🔹 GRÁFICO
-                    CanvasChartWidget(
-                      chartMode: controller.chartMode,
-                      open: controller.open,
-                      high: controller.high,
-                      low: controller.low,
-                      close: controller.close,
-                      volume: controller.volume,
-                      timestamp: controller.timestamp,
-                      showOpen: controller.showOpen,
-                      showHigh: controller.showHigh,
-                      showLow: controller.showLow,
-                      showClose: controller.showClose,
-                    ),
-                  ],
-                );
-              },
-            ),
-            //titulo
-            Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: Theme.of(
-                    context,
-                  ).extension<AppPageLayoutTheme>()!.maxContentWidth,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 100),
-                  child: Text(
-                    "Indicadores Financeiros",
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.title.copyWith(fontSize: 22),
                   ),
-                ),
+
+                // LAYOUT PRINCIPAL
+                if (chartController.close.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: isWide
+                        ? _buildWideLayout(
+                            context,
+                            chartController,
+                            indicatorsController,
+                            cardTheme,
+                          )
+                        : _buildNarrowLayout(
+                            context,
+                            chartController,
+                            indicatorsController,
+                            cardTheme,
+                          ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // =============================================================
+  // DESKTOP / TELA LARGA (wide layout)
+  // =============================================================
+  Widget _buildWideLayout(
+    BuildContext context,
+    IndicatorsController chart,
+    FinancialIndicatorsController indicators,
+    AppCardTheme cardTheme,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double totalWidth = constraints.maxWidth;
+
+        const double panelWidth = 380;
+        const double minChartWidth = 800;
+
+        double chartWidth = totalWidth - panelWidth - 24;
+
+        if (chartWidth < minChartWidth) {
+          chartWidth = minChartWidth;
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ============================
+            // GRÁFICO (ESQUERDA)
+            // ============================
+            SizedBox(
+              width: chartWidth,
+              child: Column(
+                children: [
+                  // FILTROS
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: const OhlcFilterBar(),
+                          ),
+                        ),
+                        Expanded(
+                          child: Center(
+                            child: ChartModeSelector(
+                              selected: chart.chartMode,
+                              onChanged: (mode) => chart.setChartMode(mode),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: RangeFilterBar(
+                              selected: chart.currentRange,
+                              onSelected: (range) =>
+                                  chart.setRange(context, range),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // GRÁFICO
+                  CanvasChartWidget(
+                    chartMode: chart.chartMode,
+                    open: chart.open,
+                    high: chart.high,
+                    low: chart.low,
+                    close: chart.close,
+                    volume: chart.volume,
+                    timestamp: chart.timestamp,
+                    showOpen: chart.showOpen,
+                    showHigh: chart.showHigh,
+                    showLow: chart.showLow,
+                    showClose: chart.showClose,
+                  ),
+                ],
               ),
             ),
 
-            //indicadores financeiros
-            Consumer<FinancialIndicatorsController>(
-              builder: (context, indicators, _) {
-                if (indicators.isLoading) {
-                  return const Padding(padding: EdgeInsets.all(16));
-                }
+            const SizedBox(width: 24),
 
-                if (indicators.errorMessage != null) {
-                  return Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      indicators.errorMessage!,
-                      style: TextStyle(color: Colors.redAccent),
-                    ),
-                  );
-                }
+            // ============================
+            // INDICADORES (DIREITA)
+            // ============================
+            SizedBox(
+              width: panelWidth,
+              child: _buildIndicatorsPanel(context, indicators),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-                if (indicators.data == null) {
-                  return const SizedBox.shrink();
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: IndicatorCards(data: indicators.data!),
-                );
-              },
+  // =============================================================
+  // MOBILE / TELA ESTREITA
+  // =============================================================
+  Widget _buildNarrowLayout(
+    BuildContext context,
+    IndicatorsController chart,
+    FinancialIndicatorsController indicators,
+    AppCardTheme cardTheme,
+  ) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: const OhlcFilterBar()),
+            Expanded(
+              child: Center(
+                child: ChartModeSelector(
+                  selected: chart.chartMode,
+                  onChanged: (mode) => chart.setChartMode(mode),
+                ),
+              ),
+            ),
+            Expanded(
+              child: RangeFilterBar(
+                selected: chart.currentRange,
+                onSelected: (range) => chart.setRange(context, range),
+              ),
             ),
           ],
         ),
+
+        CanvasChartWidget(
+          chartMode: chart.chartMode,
+          open: chart.open,
+          high: chart.high,
+          low: chart.low,
+          close: chart.close,
+          volume: chart.volume,
+          timestamp: chart.timestamp,
+          showOpen: chart.showOpen,
+          showHigh: chart.showHigh,
+          showLow: chart.showLow,
+          showClose: chart.showClose,
+        ),
+
+        const SizedBox(height: 30),
+
+        _buildIndicatorsPanel(context, indicators),
+      ],
+    );
+  }
+
+  // =============================================================
+  // PAINEL DE INDICADORES
+  // =============================================================
+  Widget _buildIndicatorsPanel(
+    BuildContext context,
+    FinancialIndicatorsController indicators,
+  ) {
+    if (indicators.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(16),
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (indicators.errorMessage != null) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          indicators.errorMessage!,
+          style: const TextStyle(color: Colors.red),
+        ),
+      );
+    }
+
+    if (indicators.data == null) {
+      return const SizedBox.shrink();
+    }
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 4, right: 4, top: 12),
+        child: IndicatorCards(data: indicators.data!),
       ),
     );
   }

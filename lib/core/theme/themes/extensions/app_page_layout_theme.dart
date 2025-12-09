@@ -1,31 +1,34 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'package:flutter/material.dart';
-
 
 class AppPageLayoutTheme extends ThemeExtension<AppPageLayoutTheme> {
   final double maxContentWidth;
   final EdgeInsets pagePadding;
   final bool centerContent;
 
+  /// Quando true → página ocupa 100% da largura disponível
+  final bool fullWidth;
+
   const AppPageLayoutTheme({
     required this.maxContentWidth,
     required this.pagePadding,
     required this.centerContent,
+    required this.fullWidth,
   });
 
-  // Tema para modo claro
+  /// 🔥 PADRÃO GLOBAL = LAYOUT 100% SEM CENTRALIZAR
   static const AppPageLayoutTheme light = AppPageLayoutTheme(
-    maxContentWidth: 1600,
+    maxContentWidth: double.infinity,
     pagePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    centerContent: true,
+    centerContent: false,
+    fullWidth: true,
   );
 
-  // Tema para modo escuro
   static const AppPageLayoutTheme dark = AppPageLayoutTheme(
-    maxContentWidth: 1500,
+    maxContentWidth: double.infinity,
     pagePadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    centerContent: true,
+    centerContent: false,
+    fullWidth: true,
   );
 
   @override
@@ -33,11 +36,13 @@ class AppPageLayoutTheme extends ThemeExtension<AppPageLayoutTheme> {
     double? maxContentWidth,
     EdgeInsets? pagePadding,
     bool? centerContent,
+    bool? fullWidth,
   }) {
     return AppPageLayoutTheme(
       maxContentWidth: maxContentWidth ?? this.maxContentWidth,
       pagePadding: pagePadding ?? this.pagePadding,
       centerContent: centerContent ?? this.centerContent,
+      fullWidth: fullWidth ?? this.fullWidth,
     );
   }
 
@@ -49,6 +54,7 @@ class AppPageLayoutTheme extends ThemeExtension<AppPageLayoutTheme> {
       maxContentWidth: lerpDouble(maxContentWidth, other.maxContentWidth, t)!,
       pagePadding: EdgeInsets.lerp(pagePadding, other.pagePadding, t)!,
       centerContent: other.centerContent,
+      fullWidth: other.fullWidth,
     );
   }
 }

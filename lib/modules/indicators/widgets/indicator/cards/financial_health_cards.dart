@@ -1,55 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/indicator/CategorySection.dart';
-import '../indicator_card_base.dart';
+import '../components/indicator_compact_item.dart';
+
+
+// Helpers de formatação (atalhos para sua classe Format)
+String fmt(num? v) => Format.number(v);
+String fmtPct(num? v) => Format.percent(v);
+String fmtMoney(num? v) => Format.money(v);
+String fmtCompact(num? v) => Format.compact(v);
+String fmtInt(num? v) => Format.integer(v);
+String fmtDate(num? v) => Format.date(v);
+
 
 class FinancialHealthCards extends StatelessWidget {
   final IndicatorsModel data;
+  final bool expanded;
+  final VoidCallback onToggle;
 
-  const FinancialHealthCards({super.key, required this.data});
+  const FinancialHealthCards({
+    super.key,
+    required this.data,
+    required this.expanded,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return CategorySection(
-      title: "Saúde Financeira",
+    final mainItems = [
+      IndicatorCompactItem(label: "Total Cash", value: fmtCompact(data.totalCash)),
+      IndicatorCompactItem(label: "Total Debt", value: fmtCompact(data.totalDebt)),
+      IndicatorCompactItem(label: "Cash Per Share", value: fmt(data.cashPerShare)),
+      IndicatorCompactItem(label: "Debt / Equity", value: fmt(data.debtToEquity)),
+    ];
 
-      primaryCards: [
-        IndicatorCardBase(
-          title: "Dívida Total",
-          value: Format.compact(data.totalDebt),
-        ),
-        IndicatorCardBase(
-          title: "Dívida / Patrimônio",
-          value: Format.number(data.debtToEquity),
-        ),
-        IndicatorCardBase(
-          title: "Caixa Total",
-          value: Format.compact(data.totalCash),
-        ),
-        IndicatorCardBase(
-          title: "Caixa por Ação",
-          value: Format.money(data.totalCashPerShare),
-        ),
-      ],
+    final advancedItems = [
+      IndicatorCompactItem(label: "Operating Cashflow", value: fmtCompact(data.operatingCashflow)),
+      IndicatorCompactItem(label: "Free Cashflow", value: fmtCompact(data.freeCashflow)),
+      IndicatorCompactItem(label: "OCF Per Share", value: fmt(data.operatingCashflowPerShare)),
+      IndicatorCompactItem(label: "Free Cashflow Yield", value: fmtPct(data.freeCashFlowYield)),
+    ];
 
-      secondaryCards: [
-        IndicatorCardBase(
-          title: "Fluxo de Caixa Operacional",
-          value: Format.compact(data.operatingCashflow),
-        ),
-        IndicatorCardBase(
-          title: "Fluxo de Caixa Livre",
-          value: Format.compact(data.freeCashflow),
-        ),
-        IndicatorCardBase(
-          title: "Lucro Bruto",
-          value: Format.compact(data.grossProfits),
-        ),
-        IndicatorCardBase(
-          title: "Receita Total",
-          value: Format.compact(data.totalRevenue),
-        ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Saúde Financeira", style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          ...mainItems,
+          if (expanded) ...advancedItems,
+        ]),
+
+        TextButton(onPressed: onToggle, child: Text(expanded ? "Ver menos" : "Ver mais")),
       ],
     );
   }

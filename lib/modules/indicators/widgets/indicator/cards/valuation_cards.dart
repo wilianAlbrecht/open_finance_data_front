@@ -1,66 +1,76 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/indicator/CategorySection.dart';
-import '../indicator_card_base.dart';
+import '../components/indicator_compact_item.dart';
+
+// Helpers corretos
+String fmt(num? v) => Format.number(v);
+String fmtPct(num? v) => Format.percent(v);
+String fmtMoney(num? v) => Format.money(v);
+String fmtCompact(num? v) => Format.compact(v);
+String fmtInt(num? v) => Format.integer(v);
+String fmtDate(num? v) => Format.date(v);
 
 class ValuationCards extends StatelessWidget {
   final IndicatorsModel data;
+  final bool expanded;
+  final VoidCallback onToggle;
 
-  const ValuationCards({super.key, required this.data});
+  const ValuationCards({
+    super.key,
+    required this.data,
+    required this.expanded,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return CategorySection(
-      title: "Valuation & Rentabilidade",
+    final mainItems = [
+      IndicatorCompactItem(label: "P/E", value: fmt(data.priceToEarnings)),
+      IndicatorCompactItem(label: "P/B", value: fmt(data.priceToBook)),
+      IndicatorCompactItem(
+        label: "Earnings Yield",
+        value: fmtPct(data.earningsYield), // AGORA CORRETO
+      ),
+      IndicatorCompactItem(label: "PEG Ratio", value: fmt(data.pegRatio)),
+    ];
 
-      primaryCards: [
-        IndicatorCardBase(
-          title: "P/L",
-          value: Format.number(data.priceToEarnings),
-        ),
-        IndicatorCardBase(
-          title: "Earnings Yield",
-          value: Format.percent(data.earningsYield),
-        ),
-        IndicatorCardBase(
-          title: "P/B",
-          value: Format.number(data.priceToBook),
-        ),
-        IndicatorCardBase(
-          title: "Book Value",
-          value: Format.money(data.bookValue),
-        ),
-        IndicatorCardBase(
-          title: "Enterprise Value",
-          value: Format.compact(data.enterpriseValue),
-        ),
-      ],
+    final advancedItems = [
+      IndicatorCompactItem(
+        label: "EV / Revenue",
+        value: fmt(data.enterpriseToRevenue),
+      ),
+      IndicatorCompactItem(
+        label: "EV / EBITDA",
+        value: fmt(data.enterpriseToEbitda),
+      ),
+      IndicatorCompactItem(
+        label: "Price/Sales",
+        value: fmt(data.priceToSales),
+      ),
+    ];
 
-      secondaryCards: [
-        IndicatorCardBase(
-          title: "EV / Receita",
-          value: Format.number(data.enterpriseToRevenue),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Valuation & Rentabilidade",
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-        IndicatorCardBase(
-          title: "EV / EBITDA",
-          value: Format.number(data.enterpriseToEbitda),
+        const SizedBox(height: 8),
+
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ...mainItems,
+            if (expanded) ...advancedItems,
+          ],
         ),
-        IndicatorCardBase(
-          title: "Margem Líquida",
-          value: Format.percent(data.profitMargins),
-        ),
-        IndicatorCardBase(
-          title: "ROA",
-          value: Format.percent(data.returnOnAssets),
-        ),
-        IndicatorCardBase(
-          title: "ROE",
-          value: Format.percent(data.returnOnEquity),
-        ),
-        IndicatorCardBase(
-          title: "PEG Ratio",
-          value: Format.number(data.pegRatio),
+
+        TextButton(
+          onPressed: onToggle,
+          child: Text(expanded ? "Ver menos" : "Ver mais"),
         ),
       ],
     );

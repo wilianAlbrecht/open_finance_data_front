@@ -44,7 +44,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
               controller: controller,
               style: AppTextStyles.body.copyWith(color: textColor),
               decoration: InputDecoration(
-                hintText: 'Buscar ativo (ex: PETR4, AAPL, TSLA)',
+                hintText: 'Buscar ativo (ex: PETR4.SA, AAPL, TSLA)',
                 hintStyle: AppTextStyles.body.copyWith(
                   color: textColor.withOpacity(0.6),
                 ),
@@ -54,7 +54,6 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 ),
 
                 filled: true,
-                fillColor: cardTheme.background,
 
                 contentPadding: AppLayout.paddingSm,
 

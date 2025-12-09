@@ -88,34 +88,30 @@ class RangeFilterBar extends StatelessWidget {
 
     return SizedBox(
       height: 42,
-      child: Row(
+      child: Wrap(
+        spacing: 8,
         children: PriceRange.values.map((range) {
           final isSelected = range == selected;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: GestureDetector(
-              onTap: () => onSelected(range),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 8,
+
+          return GestureDetector(
+            onTap: () => onSelected(range),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected ? theme.selectedBg : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: theme.borderColor,
+                  width: isSelected ? 1.4 : 1,
                 ),
-                decoration: BoxDecoration(
-                  color: isSelected ? theme.selectedBg : Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: theme.borderColor,
-                    width: isSelected ? 1.4 : 1,
-                  ),
-                ),
-                child: Text(
-                  range.label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: theme.labelColor,
-                  ),
+              ),
+              child: Text(
+                range.label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: theme.labelColor,
                 ),
               ),
             ),

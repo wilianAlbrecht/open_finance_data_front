@@ -1,54 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/indicator/CategorySection.dart';
-import '../indicator_card_base.dart';
+import '../components/indicator_compact_item.dart';
+
+// Helpers de formatação (atalhos para sua classe Format)
+String fmt(num? v) => Format.number(v);
+String fmtPct(num? v) => Format.percent(v);
+String fmtMoney(num? v) => Format.money(v);
+String fmtCompact(num? v) => Format.compact(v);
+String fmtInt(num? v) => Format.integer(v);
+String fmtDate(num? v) => Format.date(v);
 
 class ProjectionsCards extends StatelessWidget {
   final IndicatorsModel data;
+  final bool expanded;
+  final VoidCallback onToggle;
 
-  const ProjectionsCards({super.key, required this.data});
+  const ProjectionsCards({
+    super.key,
+    required this.data,
+    required this.expanded,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return CategorySection(
-      title: "Projeções & Analistas",
+    final mainItems = [
+      IndicatorCompactItem(
+        label: "Target Mean Price",
+        value: fmt(data.targetMeanPrice),
+      ),
+      IndicatorCompactItem(
+        label: "Target High Price",
+        value: fmt(data.targetHighPrice),
+      ),
+      IndicatorCompactItem(
+        label: "Target Low Price",
+        value: fmt(data.targetLowPrice),
+      ),
+      IndicatorCompactItem(
+        label: "Recommendation Mean",
+        value: fmt(data.recommendationMean),
+      ),
+    ];
 
-      primaryCards: [
-        IndicatorCardBase(
-          title: "Preço Alvo Máximo",
-          value: Format.money(data.targetHighPrice),
-        ),
-        IndicatorCardBase(
-          title: "Preço Alvo Mínimo",
-          value: Format.money(data.targetLowPrice),
-        ),
-        IndicatorCardBase(
-          title: "Preço Alvo Médio",
-          value: Format.money(data.targetMeanPrice),
-        ),
-        IndicatorCardBase(
-          title: "Preço Mediano",
-          value: Format.money(data.targetMedianPrice),
-        ),
-      ],
+    final advancedItems = [
+      IndicatorCompactItem(
+        label: "Analyst Opinions",
+        value: fmtInt(data.numberOfAnalystOpinions),
+      ),
+      IndicatorCompactItem(
+        label: "Target Median Price",
+        value: fmt(data.targetMedianPrice),
+      ),
+    ];
 
-      secondaryCards: [
-        IndicatorCardBase(
-          title: "Recomendação Média",
-          value: Format.number(data.recommendationMean),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Projeções & Analistas",
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-        IndicatorCardBase(
-          title: "Nº Analistas",
-          value: Format.integer(data.numberOfAnalystOpinions),
+        const SizedBox(height: 8),
+
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [...mainItems, if (expanded) ...advancedItems],
         ),
-        IndicatorCardBase(
-          title: "Crescimento Receita",
-          value: Format.percent(data.revenueGrowth),
-        ),
-        IndicatorCardBase(
-          title: "Crescimento Lucro",
-          value: Format.percent(data.earningsGrowth),
+
+        TextButton(
+          onPressed: onToggle,
+          child: Text(expanded ? "Ver menos" : "Ver mais"),
         ),
       ],
     );

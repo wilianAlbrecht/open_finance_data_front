@@ -1,32 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/indicator/CategorySection.dart';
+import '../components/indicator_compact_item.dart';
 
-import '../indicator_card_base.dart';
+// Helpers de formatação (atalhos para sua classe Format)
+String fmt(num? v) => Format.number(v);
+String fmtPct(num? v) => Format.percent(v);
+String fmtMoney(num? v) => Format.money(v);
+String fmtCompact(num? v) => Format.compact(v);
+String fmtInt(num? v) => Format.integer(v);
+String fmtDate(num? v) => Format.date(v);
 
 class PriceCards extends StatelessWidget {
   final IndicatorsModel data;
+  final bool expanded;
+  final VoidCallback onToggle;
 
-  const PriceCards({super.key, required this.data});
+  const PriceCards({
+    super.key,
+    required this.data,
+    required this.expanded,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return CategorySection(
-      title: "Preço & Mercado",
+    final mainItems = [
+      IndicatorCompactItem(label: "Preço Atual", value: fmt(data.currentPrice)),
+      IndicatorCompactItem(
+        label: "Previous Close",
+        value: fmt(data.previousClose),
+      ),
+      IndicatorCompactItem(
+        label: "52w High",
+        value: fmt(data.fiftyTwoWeekHigh),
+      ),
+      IndicatorCompactItem(label: "52w Low", value: fmt(data.fiftyTwoWeekLow)),
+      IndicatorCompactItem(label: "Volume", value: fmtCompact(data.volume)),
+      IndicatorCompactItem(
+        label: "Avg Volume",
+        value: fmtCompact(data.averageVolume),
+      ),
+      IndicatorCompactItem(
+        label: "Market Cap",
+        value: fmtCompact(data.marketCap),
+      ),
+      IndicatorCompactItem(label: "Beta", value: fmt(data.beta)),
+    ];
 
-      primaryCards: [
-        IndicatorCardBase(title: "Preço Atual", value: Format.money(data.currentPrice)),
-        IndicatorCardBase(title: "Fechamento Anterior", value: Format.money(data.previousClose)),
-        IndicatorCardBase(title: "Máx. 52 semanas", value: Format.money(data.fiftyTwoWeekHigh)),
-        IndicatorCardBase(title: "Mín. 52 semanas", value: Format.money(data.fiftyTwoWeekLow)),
-      ],
+    final advancedItems = [
+      IndicatorCompactItem(label: "Price/Sales", value: fmt(data.priceToSales)),
+      IndicatorCompactItem(
+        label: "Enterprise Value",
+        value: fmtCompact(data.enterpriseValue),
+      ),
+      IndicatorCompactItem(
+        label: "EV / Revenue",
+        value: fmt(data.enterpriseToRevenue),
+      ),
+    ];
 
-      secondaryCards: [
-        IndicatorCardBase(title: "Beta", value: Format.number(data.beta)),
-        IndicatorCardBase(title: "Market Cap", value: Format.compact(data.marketCap)),
-        IndicatorCardBase(title: "Volume Médio", value: Format.compact(data.averageVolume)),
-        IndicatorCardBase(title: "Volume Atual", value: Format.compact(data.volume)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Preço & Mercado", style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [...mainItems, if (expanded) ...advancedItems],
+        ),
+
+        TextButton(
+          onPressed: onToggle,
+          child: Text(expanded ? "Ver menos" : "Ver mais"),
+        ),
       ],
     );
   }
