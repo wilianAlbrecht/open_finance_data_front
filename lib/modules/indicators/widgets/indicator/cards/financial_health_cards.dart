@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
 import '../components/indicator_compact_item.dart';
 
-
-// Helpers de formatação (atalhos para sua classe Format)
+// Helpers de formatação
 String fmt(num? v) => Format.number(v);
 String fmtPct(num? v) => Format.percent(v);
 String fmtMoney(num? v) => Format.money(v);
 String fmtCompact(num? v) => Format.compact(v);
 String fmtInt(num? v) => Format.integer(v);
 String fmtDate(num? v) => Format.date(v);
-
 
 class FinancialHealthCards extends StatelessWidget {
   final IndicatorsModel data;
@@ -27,6 +26,12 @@ class FinancialHealthCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final text = pkg.text;
+
+    // ========================
+    // ITENS PRINCIPAIS
+    // ========================
     final mainItems = [
       IndicatorCompactItem(label: "Total Cash", value: fmtCompact(data.totalCash)),
       IndicatorCompactItem(label: "Total Debt", value: fmtCompact(data.totalDebt)),
@@ -34,6 +39,9 @@ class FinancialHealthCards extends StatelessWidget {
       IndicatorCompactItem(label: "Debt / Equity", value: fmt(data.debtToEquity)),
     ];
 
+    // ========================
+    // ITENS AVANÇADOS
+    // ========================
     final advancedItems = [
       IndicatorCompactItem(label: "Operating Cashflow", value: fmtCompact(data.operatingCashflow)),
       IndicatorCompactItem(label: "Free Cashflow", value: fmtCompact(data.freeCashflow)),
@@ -44,15 +52,38 @@ class FinancialHealthCards extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Saúde Financeira", style: Theme.of(context).textTheme.titleMedium),
+        // ========================
+        // TÍTULO DA SEÇÃO
+        // ========================
+        Text(
+          "Saúde Financeira",
+          style: text.sectionTitle,
+        ),
+
         const SizedBox(height: 8),
 
-        Wrap(spacing: 8, runSpacing: 8, children: [
-          ...mainItems,
-          if (expanded) ...advancedItems,
-        ]),
+        // ========================
+        // GRID DE ITENS
+        // ========================
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ...mainItems,
+            if (expanded) ...advancedItems,
+          ],
+        ),
 
-        TextButton(onPressed: onToggle, child: Text(expanded ? "Ver menos" : "Ver mais")),
+        // ========================
+        // BOTÃO EXPANDIR / REDUZIR
+        // ========================
+        TextButton(
+          onPressed: onToggle,
+          child: Text(
+            expanded ? "Ver menos" : "Ver mais",
+            style: text.showMoreButton,
+          ),
+        ),
       ],
     );
   }

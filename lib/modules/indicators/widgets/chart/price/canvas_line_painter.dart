@@ -1,47 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:open_finance_data_front/core/theme/themes/extensions/app_canvas_base_theme.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_canvas_theme.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 import 'canvas_line_chart_builder.dart';
 
 class CanvasLinePainter extends CustomPainter {
   final CanvasLineChartData data;
   final int? hoveredIndex;
   final Offset? hoveredPosition;
-  final AppCanvasBaseTheme baseTheme;
+  final AppThemePackage themePkg;
   final List<int> timestamp;
 
   CanvasLinePainter({
     required this.data,
-    required this.baseTheme,
     required this.hoveredIndex,
     required this.hoveredPosition,
+    required this.themePkg,
     required this.timestamp,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // GRID PAINT
+    // TEMA GLOBAL
+    final canvasTheme = themePkg.canvas;
+    final textTheme = themePkg.text;
+
+    // Cores
+    final gridColor = canvasTheme.gridColor;
+    final axisColor = canvasTheme.axisTextColor;
+    final openColor = canvasTheme.openColor;
+    final highColor = canvasTheme.highColor;
+    final lowColor = canvasTheme.lowColor;
+    final closeColor = canvasTheme.closeColor;
+
+    // Tipografias (fallbacks com copyWith para tamanhos específicos)
+    final labelStyle = textTheme.body;
+    final tooltipStyle = textTheme.body;
+
+    // PAINTS
     final gridPaint = Paint()
-      ..color = baseTheme.gridColor
-      ..strokeWidth = baseTheme.gridStrokeWidth;
-
-    // AXIS PAINT
+      ..color = gridColor
+      ..strokeWidth = 1;
     final axisPaint = Paint()
-      ..color = baseTheme.axisColor
-      ..strokeWidth = baseTheme.axisStrokeWidth;
-
-    // HOVER LINE
+      ..color = axisColor
+      ..strokeWidth = 1;
     final hoverLinePaint = Paint()
-      ..color = baseTheme.hoverLineColor
-      ..strokeWidth = baseTheme.hoverLineWidth;
-
-    // HOVER POINT
+      ..color = axisColor.withOpacity(.7)
+      ..strokeWidth = 1;
     final hoverPointPaint = Paint()
-      ..color = baseTheme.hoverPointColor
+      ..color = axisColor
       ..style = PaintingStyle.fill;
 
-    // ============================================================
     // 1. GRID HORIZONTAL
-    // ============================================================
     for (final y in data.gridY) {
       canvas.drawLine(
         Offset(data.chartLeft, y),
@@ -50,9 +59,7 @@ class CanvasLinePainter extends CustomPainter {
       );
     }
 
-    // ============================================================
-    // 1.5. GRID VERTICAL
-    // ============================================================
+    // 1.5 GRID VERTICAL
     for (final x in data.labelX) {
       canvas.drawLine(
         Offset(x, data.chartTop),
@@ -61,48 +68,38 @@ class CanvasLinePainter extends CustomPainter {
       );
     }
 
-    // ============================================================
     // 2. EIXOS
-    // ============================================================
     canvas.drawLine(
       Offset(data.chartLeft, data.chartBottom),
       Offset(data.chartRight, data.chartBottom),
       axisPaint,
     );
-
     canvas.drawLine(
       Offset(data.chartLeft, data.chartTop),
       Offset(data.chartLeft, data.chartBottom),
       axisPaint,
     );
 
-    // ============================================================
     // 3. LABELS EIXO X
-    // ============================================================
     for (int i = 0; i < data.xLabels.length; i++) {
       final x = data.labelX[i];
       final text = data.xLabels[i];
 
       final tp = TextPainter(
-        text: TextSpan(text: text, style: baseTheme.labelStyle),
+        text: TextSpan(text: text, style: labelStyle),
         textDirection: TextDirection.ltr,
       )..layout();
 
       tp.paint(canvas, Offset(x - tp.width / 2, data.chartBottom + 4));
     }
 
-    // ============================================================
     // 4. LABELS EIXO Y
-    // ============================================================
     for (int i = 0; i < data.gridValues.length; i++) {
       final value = data.gridValues[i];
       final y = data.gridY[i];
 
       final tp = TextPainter(
-        text: TextSpan(
-          text: value.toStringAsFixed(2),
-          style: baseTheme.labelStyle,
-        ),
+        text: TextSpan(text: value.toStringAsFixed(2), style: labelStyle),
         textDirection: TextDirection.ltr,
       )..layout();
 
@@ -112,82 +109,57 @@ class CanvasLinePainter extends CustomPainter {
       );
     }
 
-    // ============================================================
-    // 5. DRAW MULTIPLE SERIES
-    // ============================================================
-    _drawSeries(canvas, data.openPoints, baseTheme.openColor);
-    _drawSeries(canvas, data.highPoints, baseTheme.highColor);
-    _drawSeries(canvas, data.lowPoints, baseTheme.lowColor);
-    _drawSeries(canvas, data.closePoints, baseTheme.closeColor);
+    // 5. SÉRIES
+    _drawSeries(canvas, data.openPoints, openColor);
+    _drawSeries(canvas, data.highPoints, highColor);
+    _drawSeries(canvas, data.lowPoints, lowColor);
+    _drawSeries(canvas, data.closePoints, closeColor);
 
-    // ============================================================
-    // 6. HOVER
-    // ============================================================
-    // Só processa hover se houver séries ativas
-    if (hoveredPosition != null && hoveredIndex != null && data.tooltipSeries.isNotEmpty) {
+    // 6. HOVER (se houver)
+    if (hoveredPosition != null && hoveredIndex != null) {
       final i = hoveredIndex!;
       if (i >= 0 && i < data.points.length) {
         final point = data.points[i];
 
-        // Linha vertical
+        // linha vertical
         canvas.drawLine(
           Offset(point.dx, data.chartTop),
           Offset(point.dx, data.chartBottom),
           hoverLinePaint,
         );
 
-        // Desenhar pontos em todas as séries visíveis
-        // Open
+        // pontos nas séries visíveis
         if (i < data.openPoints.length) {
-          final pointPaint = Paint()
-            ..color = baseTheme.openColor
-            ..style = PaintingStyle.fill;
-          canvas.drawCircle(data.openPoints[i], baseTheme.hoverPointRadius, pointPaint);
+          canvas.drawCircle(data.openPoints[i], 4, Paint()..color = openColor);
         }
-
-        // High
         if (i < data.highPoints.length) {
-          final pointPaint = Paint()
-            ..color = baseTheme.highColor
-            ..style = PaintingStyle.fill;
-          canvas.drawCircle(data.highPoints[i], baseTheme.hoverPointRadius, pointPaint);
+          canvas.drawCircle(data.highPoints[i], 4, Paint()..color = highColor);
         }
-
-        // Low
         if (i < data.lowPoints.length) {
-          final pointPaint = Paint()
-            ..color = baseTheme.lowColor
-            ..style = PaintingStyle.fill;
-          canvas.drawCircle(data.lowPoints[i], baseTheme.hoverPointRadius, pointPaint);
+          canvas.drawCircle(data.lowPoints[i], 4, Paint()..color = lowColor);
         }
-
-        // Close
         if (i < data.closePoints.length) {
-          final pointPaint = Paint()
-            ..color = baseTheme.closeColor
-            ..style = PaintingStyle.fill;
-          canvas.drawCircle(data.closePoints[i], baseTheme.hoverPointRadius, pointPaint);
+          canvas.drawCircle(
+            data.closePoints[i],
+            4,
+            Paint()..color = closeColor,
+          );
         }
 
-        // Tooltip com valores (só se houver séries ativas)
-        if (data.tooltipSeries.isNotEmpty) {
-          _drawTooltip(canvas, point, i);
-        }
+        // tooltip de valores (exemplo simples com close)
+        _drawTooltip(canvas, point, i, tooltipStyle, canvasTheme);
 
-        // -------------- DRAW HOVER DATE --------------
-        // Só desenha a data do hover se não houver uma data fixa nessa posição
+        // data hover (somente se não for uma label fixa)
         if (!data.labelIndexes.contains(i)) {
           final hoverDate = data.fullXLabels[i];
 
           final tp = TextPainter(
-            text: TextSpan(text: hoverDate, style: baseTheme.labelStyle),
+            text: TextSpan(text: hoverDate, style: labelStyle),
             textDirection: TextDirection.ltr,
           )..layout();
 
-          // Verificar se há sobreposição com alguma data fixa
           bool hasOverlap = false;
-          const overlapThreshold = 50.0; // distância mínima para considerar sobreposição
-          
+          const overlapThreshold = 50.0;
           for (final fixedX in data.labelX) {
             if ((point.dx - fixedX).abs() < overlapThreshold) {
               hasOverlap = true;
@@ -195,26 +167,15 @@ class CanvasLinePainter extends CustomPainter {
             }
           }
 
-          // Se houver sobreposição, mover para baixo; caso contrário, manter no mesmo eixo
-          final yPosition = hasOverlap 
-              ? data.chartBottom + 20 // abaixo das datas fixas
-              : data.chartBottom + 4; // mesmo eixo das datas fixas
-
-          tp.paint(
-            canvas,
-            Offset(
-              point.dx - tp.width / 2,
-              yPosition,
-            ),
-          );
+          final yPosition = hasOverlap
+              ? data.chartBottom + 20
+              : data.chartBottom + 4;
+          tp.paint(canvas, Offset(point.dx - tp.width / 2, yPosition));
         }
       }
     }
   }
 
-  // ============================================================
-  // DRAW SINGLE SERIES
-  // ============================================================
   void _drawSeries(Canvas canvas, List<Offset> points, Color color) {
     if (points.length < 2) return;
 
@@ -222,30 +183,29 @@ class CanvasLinePainter extends CustomPainter {
       ..color = color
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-
     final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (int i = 1; i < points.length; i++) {
+    for (int i = 1; i < points.length; i++)
       path.lineTo(points[i].dx, points[i].dy);
-    }
-
     canvas.drawPath(path, paint);
   }
 
-  // ============================================================
-  // TOOLTIP
-  // ============================================================
-  void _drawTooltip(Canvas canvas, Offset point, int index) {
+  void _drawTooltip(
+    Canvas canvas,
+    Offset point,
+    int index,
+    TextStyle tooltipTextStyle,
+    AppCanvasTheme canvasTheme,
+  ) {
     final entries = <TextPainter>[];
-
     double maxWidth = 0;
 
-    // Criar painters para cada linha do tooltip
     for (final s in data.tooltipSeries) {
       final value = s.values[index];
+
       final tp = TextPainter(
         text: TextSpan(
           text: "${s.label}: ${value.toStringAsFixed(2)}",
-          style: baseTheme.tooltipStyle.copyWith(color: s.color),
+          style: tooltipTextStyle.copyWith(color: s.color),
         ),
         textDirection: TextDirection.ltr,
       )..layout();
@@ -259,30 +219,28 @@ class CanvasLinePainter extends CustomPainter {
     final rectHeight =
         entries.length * (entries.first.height + 2) + padding * 2;
 
-    final tooltipRect = Rect.fromLTWH(
+    final rect = Rect.fromLTWH(
       point.dx - rectWidth / 2,
-      point.dy - rectHeight - 12,
+      point.dy - rectHeight - 16,
       rectWidth,
       rectHeight,
     );
 
-    final rrect = RRect.fromRectAndRadius(tooltipRect, Radius.circular(6));
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(6));
 
-    final bgPaint = Paint()..color = Colors.black.withOpacity(0.85);
-    canvas.drawRRect(rrect, bgPaint);
+    canvas.drawRRect(rrect, Paint()..color = Colors.black.withOpacity(0.85));
 
-    double dy = tooltipRect.top + padding;
+    double offsetY = rect.top + padding;
 
     for (final tp in entries) {
-      tp.paint(canvas, Offset(tooltipRect.left + padding, dy));
-      dy += tp.height + 2;
+      tp.paint(canvas, Offset(rect.left + padding, offsetY));
+      offsetY += tp.height + 2;
     }
   }
 
   @override
-  bool shouldRepaint(CanvasLinePainter oldDelegate) {
-    return oldDelegate.data != data ||
-        oldDelegate.hoveredIndex != hoveredIndex ||
-        oldDelegate.hoveredPosition != hoveredPosition;
-  }
+  bool shouldRepaint(CanvasLinePainter old) =>
+      old.data != data ||
+      old.hoveredIndex != hoveredIndex ||
+      old.hoveredPosition != hoveredPosition;
 }

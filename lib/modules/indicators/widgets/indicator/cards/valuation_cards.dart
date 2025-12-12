@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
 import '../components/indicator_compact_item.dart';
 
-// Helpers corretos
 String fmt(num? v) => Format.number(v);
 String fmtPct(num? v) => Format.percent(v);
 String fmtMoney(num? v) => Format.money(v);
@@ -25,27 +25,40 @@ class ValuationCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final text = pkg.text;
+
+    // ========================
+    // ITENS PRINCIPAIS
+    // ========================
     final mainItems = [
       IndicatorCompactItem(label: "P/E", value: fmt(data.priceToEarnings)),
       IndicatorCompactItem(label: "P/B", value: fmt(data.priceToBook)),
-      IndicatorCompactItem(label: "Earnings Yield", value: fmtPct(data.earningsYield),),
-      IndicatorCompactItem(label: "PEG Ratio", value: fmt(data.pegRatio)),];
+      IndicatorCompactItem(label: "Earnings Yield", value: fmtPct(data.earningsYield)),
+      IndicatorCompactItem(label: "PEG Ratio", value: fmt(data.pegRatio)),
+    ];
 
+    // ========================
+    // ITENS AVANÇADOS
+    // ========================
     final advancedItems = [
-      IndicatorCompactItem(label: "EV / Revenue", value: fmt(data.enterpriseToRevenue),),
-      IndicatorCompactItem(label: "EV / EBITDA", value: fmt(data.enterpriseToEbitda),),
-      IndicatorCompactItem(label: "Price/Sales", value: fmt(data.priceToSales),),
+      IndicatorCompactItem(label: "EV / Revenue", value: fmt(data.enterpriseToRevenue)),
+      IndicatorCompactItem(label: "EV / EBITDA", value: fmt(data.enterpriseToEbitda)),
+      IndicatorCompactItem(label: "Price/Sales", value: fmt(data.priceToSales)),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // TÍTULO DA SEÇÃO
         Text(
           "Valuation & Rentabilidade",
-          style: Theme.of(context).textTheme.titleMedium,
+          style: text.sectionTitle,
         ),
+
         const SizedBox(height: 8),
 
+        // ITENS EM GRID/WRAP
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -55,9 +68,13 @@ class ValuationCards extends StatelessWidget {
           ],
         ),
 
+        // BOTÃO "VER MAIS / VER MENOS"
         TextButton(
           onPressed: onToggle,
-          child: Text(expanded ? "Ver menos" : "Ver mais"),
+          child: Text(
+            expanded ? "Ver menos" : "Ver mais",
+            style: text.showMoreButton,
+          ),
         ),
       ],
     );

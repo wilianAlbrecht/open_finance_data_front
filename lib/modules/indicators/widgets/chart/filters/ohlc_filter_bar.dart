@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/theme/app_spacing.dart';
-import '../../../../../core/theme/app_text_styles.dart';
-import '../../../controllers/price_chart_controller.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../../core/theme/themes/extensions/app_theme_package.dart';
+import '../../../../../core/theme/app_spacing.dart';
+import '../../../controllers/price_chart_controller.dart';
 
 class OhlcFilterBar extends StatelessWidget {
   const OhlcFilterBar({super.key});
@@ -15,26 +15,35 @@ class OhlcFilterBar extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    final theme = Theme.of(context);
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final filterTheme = pkg.filters;
+    final textTheme = pkg.text;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-      child: ChoiceChip(
-        label: Text(
-          label,
-          style: AppTextStyles.body.copyWith(
-            color: active ? color : theme.textTheme.bodyMedium!.color,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: filterTheme.padding,
+          decoration: BoxDecoration(
+            color: active
+                ? color.withAlpha(60)
+                : filterTheme.background,
+            borderRadius: BorderRadius.circular(filterTheme.radius),
+            border: Border.all(
+              color: active ? color : filterTheme.borderColor,
+              width: 1.2,
+            ),
+          ),
+          child: Text(
+            label,
+            style: textTheme.body.copyWith(
+              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+              color: active ? color : filterTheme.textColor,
+            ),
           ),
         ),
-        selected: active,
-        selectedColor: color.withOpacity(0.18),
-        backgroundColor: theme.colorScheme.surface.withOpacity(0.6),
-        side: BorderSide(
-          color: active ? color : theme.dividerColor,
-          width: 1.2,
-        ),
-        pressElevation: 0,
-        onSelected: (_) => onTap(),
       ),
     );
   }
@@ -42,6 +51,8 @@ class OhlcFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<IndicatorsController>();
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final canvas = pkg.canvas;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -54,31 +65,28 @@ class OhlcFilterBar extends StatelessWidget {
             context: context,
             label: "Open",
             active: controller.showOpen,
-            color: AppColors.filterOpen,
+            color: canvas.openColor,
             onTap: () => controller.toggleOpen(context),
           ),
-
           _chip(
             context: context,
             label: "High",
             active: controller.showHigh,
-            color: AppColors.filterHigh,
+            color: canvas.highColor,
             onTap: () => controller.toggleHigh(context),
           ),
-
           _chip(
             context: context,
             label: "Low",
             active: controller.showLow,
-            color: AppColors.filterLow,
+            color: canvas.lowColor,
             onTap: () => controller.toggleLow(context),
           ),
-
           _chip(
             context: context,
             label: "Close",
             active: controller.showClose,
-            color: AppColors.filterClose,
+            color: canvas.closeColor,
             onTap: () => controller.toggleClose(context),
           ),
         ],

@@ -1,57 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/core/theme/app_colors.dart';
 
-class AppCardTheme extends ThemeExtension<AppCardTheme> {
+class AppIndicatorCardTheme extends ThemeExtension<AppIndicatorCardTheme> {
   final Color background;
   final Color borderColor;
-  final double radius;
   final EdgeInsets padding;
+  final double radius;
 
-  const AppCardTheme({
+  const AppIndicatorCardTheme({
     required this.background,
     required this.borderColor,
-    required this.radius,
     required this.padding,
+    required this.radius,
   });
 
-  static const light = AppCardTheme(
+  static const light = AppIndicatorCardTheme(
     background: AppColors.cardLight,
     borderColor: AppColors.dividerLight,
-    radius: 16,
-    padding: EdgeInsets.all(16),
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    radius: 12,
   );
 
-  static const dark = AppCardTheme(
+  static const dark = AppIndicatorCardTheme(
     background: AppColors.cardDark,
     borderColor: AppColors.dividerDark,
-    radius: 16,
-    padding: EdgeInsets.all(16),
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    radius: 12,
   );
 
   @override
-  AppCardTheme copyWith({
+  AppIndicatorCardTheme copyWith({
     Color? background,
     Color? borderColor,
-    double? radius,
     EdgeInsets? padding,
+    double? radius,
   }) {
-    return AppCardTheme(
+    return AppIndicatorCardTheme(
       background: background ?? this.background,
       borderColor: borderColor ?? this.borderColor,
-      radius: radius ?? this.radius,
       padding: padding ?? this.padding,
+      radius: radius ?? this.radius,
     );
   }
 
   @override
-  AppCardTheme lerp(ThemeExtension<AppCardTheme>? other, double t) {
-    if (other is! AppCardTheme) return this;
+  AppIndicatorCardTheme lerp(ThemeExtension<AppIndicatorCardTheme>? other, double t) {
+    if (other is! AppIndicatorCardTheme) return this;
 
-    return AppCardTheme(
+    return AppIndicatorCardTheme(
       background: Color.lerp(background, other.background, t)!,
       borderColor: Color.lerp(borderColor, other.borderColor, t)!,
-      radius: radius,
       padding: EdgeInsets.lerp(padding, other.padding, t)!,
+      radius: radius,
     );
   }
 }

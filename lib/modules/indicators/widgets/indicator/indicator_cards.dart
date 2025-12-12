@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
-
 import 'cards/price_cards.dart';
 import 'cards/dividends_cards.dart';
 import 'cards/financial_health_cards.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:open_finance_data_front/core/theme/themes/extensions/app_page_layout_theme.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 import 'package:open_finance_data_front/core/widgets/page_container.dart';
 import 'package:open_finance_data_front/modules/indicators/controllers/financial_indicators_controller.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/canvas_chart_widget.dart';
@@ -11,8 +11,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_layout.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/themes/extensions/app_card_theme.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
 import 'controllers/price_chart_controller.dart';
 import 'widgets/search_bar.dart';
@@ -22,28 +20,27 @@ class IndicatorsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardTheme = Theme.of(context).extension<AppCardTheme>()!;
-    final textColor = Theme.of(context).colorScheme.onSurface;
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final text = pkg.text;
+    final card = pkg.card;
+    final header = pkg.header;
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: header.background,
         title: Text(
           'OpenFinanceData',
-          style: AppTextStyles.title.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary,
-          ),
+          style: text.title.copyWith(color: header.titleColor),
         ),
         elevation: 0,
         actions: const [ThemeToggleButton()],
       ),
 
-      // IMPORTANTÍSSIMO →
-      // Agora o Theme interno foi removido completamente.
-      // PageContainer usa o tema global (fullWidth = true).
       body: PageContainer(
+        fullWidth: true,  
         child: Consumer2<IndicatorsController, FinancialIndicatorsController>(
           builder: (context, chartController, indicatorsController, _) {
-            final isWide = MediaQuery.of(context).size.width > 1100;
+            final bool isWide = MediaQuery.of(context).size.width > 1100;
 
             return ListView(
               padding: EdgeInsets.zero,
@@ -67,15 +64,16 @@ class IndicatorsPage extends StatelessWidget {
                     ),
                     padding: AppLayout.paddingMd,
                     decoration: BoxDecoration(
-                      color: cardTheme.background,
-                      borderRadius: AppLayout.radiusMd,
+                      color: card.background,
+                      borderRadius: BorderRadius.circular(card.radius),
+                      border: Border.all(color: card.borderColor),
                     ),
                     child: Center(
                       child: Text(
                         "Busque um ativo para visualizar o gráfico",
-                        style: AppTextStyles.body.copyWith(
+                        style: text.body.copyWith(
                           fontSize: 16,
-                          color: textColor.withOpacity(0.7),
+                          color: text.body.color!.withOpacity(0.7),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -85,19 +83,19 @@ class IndicatorsPage extends StatelessWidget {
                 // LAYOUT PRINCIPAL
                 if (chartController.close.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                    ),
                     child: isWide
                         ? _buildWideLayout(
                             context,
                             chartController,
                             indicatorsController,
-                            cardTheme,
                           )
                         : _buildNarrowLayout(
                             context,
                             chartController,
                             indicatorsController,
-                            cardTheme,
                           ),
                   ),
               ],
@@ -109,26 +107,23 @@ class IndicatorsPage extends StatelessWidget {
   }
 
   // =============================================================
-  // DESKTOP / TELA LARGA (wide layout)
+  // DESKTOP (Telas largas)
   // =============================================================
   Widget _buildWideLayout(
     BuildContext context,
     IndicatorsController chart,
     FinancialIndicatorsController indicators,
-    AppCardTheme cardTheme,
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final pkg = Theme.of(context).extension<AppThemePackage>()!;
         final double totalWidth = constraints.maxWidth;
 
         const double panelWidth = 380;
         const double minChartWidth = 800;
 
         double chartWidth = totalWidth - panelWidth - 24;
-
-        if (chartWidth < minChartWidth) {
-          chartWidth = minChartWidth;
-        }
+        if (chartWidth < minChartWidth) chartWidth = minChartWidth;
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,25 +135,19 @@ class IndicatorsPage extends StatelessWidget {
               width: chartWidth,
               child: Column(
                 children: [
-                  // FILTROS
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
                     ),
                     child: Row(
                       children: [
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: const OhlcFilterBar(),
-                          ),
-                        ),
+                        const Expanded(child: OhlcFilterBar()),
                         Expanded(
                           child: Center(
                             child: ChartModeSelector(
                               selected: chart.chartMode,
-                              onChanged: (mode) => chart.setChartMode(mode),
+                              onChanged: chart.setChartMode,
                             ),
                           ),
                         ),
@@ -176,7 +165,6 @@ class IndicatorsPage extends StatelessWidget {
                     ),
                   ),
 
-                  // GRÁFICO
                   CanvasChartWidget(
                     chartMode: chart.chartMode,
                     open: chart.open,
@@ -194,7 +182,7 @@ class IndicatorsPage extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 24),
+            const SizedBox(width: AppSpacing.lg),
 
             // ============================
             // INDICADORES (DIREITA)
@@ -210,24 +198,23 @@ class IndicatorsPage extends StatelessWidget {
   }
 
   // =============================================================
-  // MOBILE / TELA ESTREITA
+  // MOBILE / TELAS ESTREITAS
   // =============================================================
   Widget _buildNarrowLayout(
     BuildContext context,
     IndicatorsController chart,
     FinancialIndicatorsController indicators,
-    AppCardTheme cardTheme,
   ) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: const OhlcFilterBar()),
+            const Expanded(child: OhlcFilterBar()),
             Expanded(
               child: Center(
                 child: ChartModeSelector(
                   selected: chart.chartMode,
-                  onChanged: (mode) => chart.setChartMode(mode),
+                  onChanged: chart.setChartMode,
                 ),
               ),
             ),
@@ -268,19 +255,22 @@ class IndicatorsPage extends StatelessWidget {
     BuildContext context,
     FinancialIndicatorsController indicators,
   ) {
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final text = pkg.text;
+
     if (indicators.isLoading) {
       return const Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: CircularProgressIndicator(),
       );
     }
 
     if (indicators.errorMessage != null) {
       return Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Text(
           indicators.errorMessage!,
-          style: const TextStyle(color: Colors.red),
+          style: text.body.copyWith(color: Colors.red),
         ),
       );
     }

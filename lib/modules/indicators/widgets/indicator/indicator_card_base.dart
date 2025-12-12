@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 
 class IndicatorCardBase extends StatelessWidget {
   final String title;
@@ -16,57 +17,47 @@ class IndicatorCardBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final card = pkg.indicatorCard;
+    final text = pkg.text;
 
     return Container(
       width: 220,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
 
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withOpacity(0.06)
-            : Colors.black.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withOpacity(0.10)
-              : Colors.black.withOpacity(0.08),
-        ),
+        color: card.background,
+        borderRadius: BorderRadius.circular(card.radius),
+        border: Border.all(color: card.borderColor),
         boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withOpacity(0.25)
-                : Colors.black.withOpacity(0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
+          // BoxShadow(
+          //   blurRadius: 8,
+          //   offset: const Offset(0, 3),
+          //   color: card.shadowColor,
+          // ),
         ],
       ),
 
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,   // 🔥 AGORA CENTRALIZA
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
-          // ====== TÍTULO ======
+          // =======================
+          //       TÍTULO
+          // =======================
           Row(
-            mainAxisSize: MainAxisSize.min,              // 🔥 evita expandir full width
+            mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null)
-                Icon(
-                  icon,
-                  size: 16,
-                  color: theme.colorScheme.primary.withOpacity(.85),
-                ),
+                // Icon(
+                //   icon,
+                //   size: 16,
+                //   color: card.iconColor,
+                // ),
               if (icon != null) const SizedBox(width: 6),
 
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurface.withOpacity(.68),
-                ),
+                style: text.caption,
                 textAlign: TextAlign.center,
               ),
             ],
@@ -74,28 +65,24 @@ class IndicatorCardBase extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // ====== VALOR ======
-          Text.rich(
-            TextSpan(
+          // =======================
+          //       VALOR
+          // =======================
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
               text: value,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
-              ),
+              style: text.number,
               children: [
                 if (unit != null)
                   TextSpan(
                     text: " $unit",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: theme.colorScheme.onSurface.withOpacity(.60),
+                    style: text.caption.copyWith(
+                      fontSize: text.caption.fontSize,
                     ),
                   ),
               ],
             ),
-            textAlign: TextAlign.center,             
           ),
         ],
       ),

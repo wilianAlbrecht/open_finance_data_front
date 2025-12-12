@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
-import 'package:open_finance_data_front/modules/indicators/widgets/chart/filters/range_filter_bar.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/dados/price_range.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
+
 
 import '../../../data/models/history_data.dart';
 import '../../../data/services/history_service.dart';
@@ -34,11 +34,8 @@ class IndicatorsController extends ChangeNotifier {
   bool showLow = false;
   bool showClose = true;
 
-  // Resultado final do builder
-  // PriceChartResult? chartResult;
-
   // ============================================================
-  // SEARCH PRINCIPAL
+  // SEARCH
   // ============================================================
 
   Future<void> search(BuildContext context, String symbol) async {
@@ -72,38 +69,23 @@ class IndicatorsController extends ChangeNotifier {
       volume = roundList(data.volume);
       timestamp = data.timestamp;
 
-      // 👉 Novo: usa o builder unificado
-      rebuildChart(context);
+      // Canvas chart não precisa mais do builder no controller
+      rebuildChart();
 
-      isLoading = false;
-      notifyListeners();
     } catch (e) {
       errorMessage = "Erro ao buscar dados para $symbol";
+    } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
   // ============================================================
-  // REBUILD DO GRÁFICO
+  // REBUILD (Canvas usa dados diretos)
   // ============================================================
 
-  void rebuildChart(BuildContext context) {
-    if (timestamp.isEmpty) return;
-
-    // final builder = PriceChartBuilder(
-    //   open: open,
-    //   high: high,
-    //   low: low,
-    //   close: close,
-    //   timestamp: timestamp,
-    //   showOpen: showOpen,
-    //   showHigh: showHigh,
-    //   showLow: showLow,
-    //   showClose: showClose,
-    // );
-
-    // chartResult = builder.build(context);
+  void rebuildChart() {
+    // Nada é calculado aqui — CanvasChartWidget recebe os dados brutos
     notifyListeners();
   }
 
@@ -113,22 +95,22 @@ class IndicatorsController extends ChangeNotifier {
 
   void toggleOpen(BuildContext context) {
     showOpen = !showOpen;
-    rebuildChart(context);
+    rebuildChart();
   }
 
   void toggleHigh(BuildContext context) {
     showHigh = !showHigh;
-    rebuildChart(context);
+    rebuildChart();
   }
 
   void toggleLow(BuildContext context) {
     showLow = !showLow;
-    rebuildChart(context);
+    rebuildChart();
   }
 
   void toggleClose(BuildContext context) {
     showClose = !showClose;
-    rebuildChart(context);
+    rebuildChart();
   }
 
   // ============================================================
@@ -177,8 +159,8 @@ class IndicatorsController extends ChangeNotifier {
       volume = roundList(data.volume);
       timestamp = data.timestamp;
 
-      // 👉 Rebuild com novos dados
-      rebuildChart(context);
+      rebuildChart();
+
     } catch (e) {
       errorMessage = "Erro ao aplicar filtro";
     } finally {
@@ -187,12 +169,17 @@ class IndicatorsController extends ChangeNotifier {
     }
   }
 
+  // ============================================================
+  // CHART MODE
+  // ============================================================
+
   void setChartMode(ChartMode mode) {
     if (chartMode == mode) return;
 
     chartMode = mode;
     notifyListeners();
   }
+
   // ============================================================
   // HELPERS
   // ============================================================

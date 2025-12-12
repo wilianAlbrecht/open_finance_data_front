@@ -1,76 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/theme/themes/extensions/app_chip_theme.dart';
-
-enum PriceRange {
-  oneMonth,
-  threeMonths,
-  sixMonths,
-  oneYear,
-  twoYears,
-  fiveYears,
-  max,
-}
-
-extension PriceRangeLabel on PriceRange {
-  String get label {
-    switch (this) {
-      case PriceRange.oneMonth:
-        return "1M";
-      case PriceRange.threeMonths:
-        return "3M";
-      case PriceRange.sixMonths:
-        return "6M";
-      case PriceRange.oneYear:
-        return "1A";
-      case PriceRange.twoYears:
-        return "2A";
-      case PriceRange.fiveYears:
-        return "5A";
-      case PriceRange.max:
-        return "Máx";
-    }
-  }
-}
-
-extension PriceRangeApi on PriceRange {
-  String get apiRange {
-    switch (this) {
-      case PriceRange.oneMonth:
-        return "1mo";
-      case PriceRange.threeMonths:
-        return "3mo";
-      case PriceRange.sixMonths:
-        return "6mo";
-      case PriceRange.oneYear:
-        return "1y";
-      case PriceRange.twoYears:
-        return "2y";
-      case PriceRange.fiveYears:
-        return "5y";
-      case PriceRange.max:
-        return "max";
-    }
-  }
-
-  String get apiInterval {
-    switch (this) {
-      case PriceRange.oneMonth:
-        return "1d";
-      case PriceRange.threeMonths:
-        return "1d";
-      case PriceRange.sixMonths:
-        return "1wk";
-      case PriceRange.oneYear:
-        return "1wk";
-      case PriceRange.twoYears:
-        return "1mo";
-      case PriceRange.fiveYears:
-        return "1mo";
-      case PriceRange.max:
-        return "1mo";
-    }
-  }
-}
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/chart/dados/price_range.dart';
 
 class RangeFilterBar extends StatelessWidget {
   final PriceRange selected;
@@ -84,7 +14,8 @@ class RangeFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).extension<AppChipTheme>()!;
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final chip = pkg.filters; 
 
     return SizedBox(
       height: 42,
@@ -99,10 +30,10 @@ class RangeFilterBar extends StatelessWidget {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: isSelected ? theme.selectedBg : Colors.transparent,
+                color: isSelected ? chip.selectedBg.withAlpha(60)  : Colors.transparent,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: theme.borderColor,
+                  color: isSelected ? chip.selectedBorder : chip.borderColor,
                   width: isSelected ? 1.4 : 1,
                 ),
               ),
@@ -110,8 +41,7 @@ class RangeFilterBar extends StatelessWidget {
                 range.label,
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: theme.labelColor,
+                  color: isSelected ? chip.selectedTextColor: chip.textColor,
                 ),
               ),
             ),

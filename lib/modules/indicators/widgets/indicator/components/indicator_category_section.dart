@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 import 'indicator_grid.dart';
 
 class IndicatorCategorySection extends StatefulWidget {
@@ -23,31 +24,47 @@ class _IndicatorCategorySectionState extends State<IndicatorCategorySection> {
 
   @override
   Widget build(BuildContext context) {
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final text = pkg.text;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // título
+        // =======================
+        // TÍTULO DA CATEGORIA
+        // =======================
         Padding(
           padding: const EdgeInsets.only(bottom: 8, top: 20),
-          child: Text(widget.title,
-              style: Theme.of(context).textTheme.titleMedium),
+          child: Text(
+            widget.title,
+            style: text.sectionTitle,
+          ),
         ),
 
-        // indicadores principais
+        // =======================
+        // INDICADORES PRINCIPAIS
+        // =======================
         IndicatorGrid(children: widget.mainItems),
 
-        // avançados
+        // =======================
+        // INDICADORES AVANÇADOS
+        // =======================
         if (expanded && widget.advancedItems.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: IndicatorGrid(children: widget.advancedItems),
           ),
 
-        // botão
+        // =======================
+        // BOTÃO EXPANDIR
+        // =======================
         if (widget.advancedItems.isNotEmpty)
           TextButton(
             onPressed: () => setState(() => expanded = !expanded),
-            child: Text(expanded ? "Ver menos" : "Ver mais"),
+            child: Text(
+              expanded ? "Ver menos" : "Ver mais",
+              style: text.button,
+            ),
           ),
       ],
     );

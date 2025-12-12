@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 import 'package:open_finance_data_front/modules/indicators/controllers/financial_indicators_controller.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_layout.dart';
-import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/theme/themes/extensions/app_card_theme.dart';
-
 import '../controllers/price_chart_controller.dart';
 
 class SearchBarWidget extends StatefulWidget {
@@ -22,14 +19,16 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
   void onSearch() {
     final value = controller.text.trim();
     if (value.isEmpty) return;
+
     context.read<IndicatorsController>().search(context, value);
     context.read<FinancialIndicatorsController>().search(value);
   }
 
   @override
   Widget build(BuildContext context) {
-    final cardTheme = Theme.of(context).extension<AppCardTheme>()!;
-    final textColor = Theme.of(context).colorScheme.onSurface;
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final search = pkg.searchBar;
+    final text = pkg.text;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -42,37 +41,38 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
           Expanded(
             child: TextField(
               controller: controller,
-              style: AppTextStyles.body.copyWith(color: textColor),
+              style: text.body,
+
               decoration: InputDecoration(
+                filled: true,
+                fillColor: search.background,
                 hintText: 'Buscar ativo (ex: PETR4.SA, AAPL, TSLA)',
-                hintStyle: AppTextStyles.body.copyWith(
-                  color: textColor.withOpacity(0.6),
-                ),
+                hintStyle: text.bodySmall,
+
                 prefixIcon: Icon(
                   Icons.search,
-                  color: textColor.withOpacity(0.7),
+                  color: search.iconColor,
                 ),
 
-                filled: true,
+                contentPadding: search.padding,
 
-                contentPadding: AppLayout.paddingSm,
-
-                border: OutlineInputBorder(
-                  borderRadius: AppLayout.radiusSm,
-                  borderSide: BorderSide(color: cardTheme.borderColor),
-                ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: AppLayout.radiusSm,
-                  borderSide: BorderSide(color: cardTheme.borderColor),
+                  borderRadius: BorderRadius.circular(search.radius),
+                  borderSide: BorderSide(color: search.borderColor),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(search.radius),
+                  borderSide: BorderSide(color: search.borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: AppLayout.radiusSm,
+                  borderRadius: BorderRadius.circular(search.radius),
                   borderSide: BorderSide(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: search.focusColor,
                     width: 2,
                   ),
                 ),
               ),
+
               onSubmitted: (_) => onSearch(),
             ),
           ),
@@ -81,10 +81,13 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
 
           // ================= BUTTON =================
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: search.focusColor,
+            ),
             onPressed: onSearch,
             child: Text(
               "Buscar",
-              style: AppTextStyles.body.copyWith(
+              style: text.button.copyWith(
                 color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),

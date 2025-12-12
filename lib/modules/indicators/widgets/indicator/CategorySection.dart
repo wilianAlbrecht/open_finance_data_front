@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:open_finance_data_front/core/theme/themes/extensions/app_page_layout_theme.dart';
+import 'package:open_finance_data_front/core/theme/app_layout.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 
 class CategorySection extends StatefulWidget {
   final String title;
@@ -22,50 +23,51 @@ class _CategorySectionState extends State<CategorySection> {
 
   @override
   Widget build(BuildContext context) {
-    final layout = Theme.of(context).extension<AppPageLayoutTheme>()!;
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final layout = Theme.of(context).extension<AppLayout>()!;
+    final text = pkg.text;
 
     return Center(
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: layout.maxContentWidth),
-
+        constraints: BoxConstraints(maxWidth: AppLayout.maxContentWidth),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,  // ⭐ CENTRALIZA TUDO
+          crossAxisAlignment: CrossAxisAlignment.center,
 
           children: [
-            // ====== TÍTULO ======
+            // ============================
+            //   TÍTULO DA CATEGORIA
+            // ============================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              child: Text(
+                widget.title,
+                style: text.sectionTitle, // ✔ feito pelo tema
+                textAlign: TextAlign.center,
               ),
             ),
 
             const SizedBox(height: 12),
 
-            // ====== CARDS PRINCIPAIS ======
+            // ============================
+            //   CARDS PRINCIPAIS
+            // ============================
             Wrap(
               spacing: 16,
               runSpacing: 16,
-              alignment: WrapAlignment.center,            // ⭐ ALINHA OS CARDS
+              alignment: WrapAlignment.center,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: widget.primaryCards,
             ),
 
-            // ====== CARDS SECUNDÁRIOS ======
+            // ============================
+            //   CARDS SECUNDÁRIOS
+            // ============================
             if (expanded) ...[
               const SizedBox(height: 12),
-
               Wrap(
                 spacing: 16,
                 runSpacing: 16,
-                alignment: WrapAlignment.center,          
+                alignment: WrapAlignment.center,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: widget.secondaryCards,
               ),
@@ -73,14 +75,15 @@ class _CategorySectionState extends State<CategorySection> {
 
             const SizedBox(height: 10),
 
-            // ====== BOTÃO EXPANDIR ======
+            // ============================
+            //   BOTÃO EXPANDIR
+            // ============================
             TextButton(
               onPressed: () => setState(() => expanded = !expanded),
               child: Text(
                 expanded ? "Mostrar menos ▲" : "Mostrar mais ▼",
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 14,
+                style: text.button.copyWith(
+                  color: pkg.header.background, 
                 ),
               ),
             ),

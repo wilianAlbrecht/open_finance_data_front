@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:open_finance_data_front/core/theme/themes/extensions/app_canvas_base_theme.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
+
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/chart_mode_selector.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/canvas_line_chart_builder.dart';
 import 'package:open_finance_data_front/modules/indicators/widgets/chart/price/canvas_line_painter.dart';
@@ -47,18 +47,40 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final baseTheme = Theme.of(context).extension<AppCanvasBaseTheme>()!;
-    final screen = MediaQuery.of(context).size;
+    // ============================================================
+    //       ACESSO AO PACOTE DE TEMA GLOBAL
+    // ============================================================
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final canvas = pkg.canvas; // <-- tema plano
 
-    final chartWidth = screen.width * baseTheme.widthFactor;
-    final chartHeight = screen.height * baseTheme.heightFactor;
+    final chartWidth =
+        MediaQuery.of(context).size.width * canvas.widthFactor;
+    final chartHeight =
+        MediaQuery.of(context).size.height * canvas.heightFactor;
+
+    // Como NÃO existe canvas.base, assumimos padding fixo
+    const double paddingLeft = 58;
+    const double paddingRight = 25;
+    const double paddingTop = 18;
+    const double paddingBottom = 35;
+
+    // width/height fixos como antes (se desejar tornamos configuráveis depois)
+    final screen = MediaQuery.of(context).size;
+    // final chartWidth = screen.width * 1;
+    // final chartHeight = screen.height * 0.40;
 
     dynamic chartData;
     CustomPainter painter;
 
-    // ===============================
-    // BUILD DATA BASEADO NO MODO
-    // ===============================
+    final showAnySeries =
+        widget.showOpen ||
+        widget.showHigh ||
+        widget.showLow ||
+        widget.showClose;
+
+    // ============================================================
+    //                       MODO PREÇO
+    // ============================================================
     if (widget.chartMode == ChartMode.price) {
       final builder = CanvasLineChartBuilder(
         open: widget.open,
@@ -70,10 +92,10 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
         showLow: widget.showLow,
         showClose: widget.showClose,
         timestamp: widget.timestamp,
-        paddingLeft: baseTheme.paddingLeft,
-        paddingRight: baseTheme.paddingRight,
-        paddingTop: baseTheme.paddingTop,
-        paddingBottom: baseTheme.paddingBottom,
+        paddingLeft: paddingLeft,
+        paddingRight: paddingRight,
+        paddingTop: paddingTop,
+        paddingBottom: paddingBottom,
         chartWidth: chartWidth,
         chartHeight: chartHeight,
         context: context,
@@ -85,17 +107,21 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
         data: chartData,
         hoveredIndex: hoveredIndex,
         hoveredPosition: hoveredPosition,
-        baseTheme: baseTheme,
+        themePkg: pkg, // ⭐ novo
         timestamp: widget.timestamp,
       );
-    } else {
+    }
+    // ============================================================
+    //                      MODO VOLUME
+    // ============================================================
+    else {
       final builder = CanvasMountainChartBuilder(
         volume: widget.volume,
         timestamp: widget.timestamp,
-        paddingLeft: baseTheme.paddingLeft,
-        paddingRight: baseTheme.paddingRight,
-        paddingTop: baseTheme.paddingTop,
-        paddingBottom: baseTheme.paddingBottom,
+        paddingLeft: paddingLeft,
+        paddingRight: paddingRight,
+        paddingTop: paddingTop,
+        paddingBottom: paddingBottom,
         chartWidth: chartWidth,
         chartHeight: chartHeight,
       );
@@ -106,41 +132,27 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
         data: chartData,
         hoveredIndex: hoveredIndex,
         hoveredPosition: hoveredPosition,
-        baseTheme: baseTheme,
+
+        // Tema plano
+        themePkg: pkg,
       );
     }
-
-    // =====================================
-    // SÉRIES ATIVAS (APENAS PARA PREÇO)
-    // =====================================
-    final hasActiveSeries =
-        widget.showOpen ||
-        widget.showHigh ||
-        widget.showLow ||
-        widget.showClose;
 
     return SizedBox(
       width: chartWidth,
       height: chartHeight,
       child: MouseRegion(
-        onExit: (_) {
-          if (!mounted) return;
-          setState(() {
-            hoveredIndex = null;
-            hoveredPosition = null;
-          });
-        },
+        onExit: (_) => setState(() {
+          hoveredIndex = null;
+          hoveredPosition = null;
+        }),
 
-        // ======================================================
-        // HOVER — FUNCIONA EM AMBOS OS MODOS
-        // ======================================================
         onHover: (event) {
-          if (widget.chartMode == ChartMode.price && !hasActiveSeries) return;
+          if (widget.chartMode == ChartMode.price && !showAnySeries) return;
 
           final pos = event.localPosition;
           final index = _getNearestPointIndex(pos, chartData);
 
-          if (!mounted) return;
           setState(() {
             hoveredPosition = pos;
             hoveredIndex = index;
@@ -152,7 +164,6 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
             final pos = event.localPosition;
             final index = _getNearestPointIndex(pos, chartData);
 
-            if (!mounted) return;
             setState(() {
               hoveredPosition = pos;
               hoveredIndex = index;
@@ -165,15 +176,15 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
   }
 
   // ============================================================
-  // CÁLCULO DO PONTO MAIS PRÓXIMO (PRICE OU VOLUME)
+  // CÁLCULO DO PONTO MAIS PRÓXIMO
   // ============================================================
   int? _getNearestPointIndex(Offset hoverPos, dynamic data) {
     late final List<Offset> points;
 
     if (data is CanvasLineChartData) {
-      points = data.points; // gráfico de linha
+      points = data.points;
     } else if (data is CanvasMountainChartData) {
-      points = data.topPoints; // gráfico de volume
+      points = data.topPoints;
     } else {
       return null;
     }
@@ -190,12 +201,5 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
     }
 
     return nearest;
-  }
-
-  @override
-  void dispose() {
-    hoveredIndex = null;
-    hoveredPosition = null;
-    super.dispose();
   }
 }

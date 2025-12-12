@@ -1,26 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:open_finance_data_front/core/theme/themes/extensions/app_page_layout_theme.dart';
+import 'package:open_finance_data_front/core/theme/app_layout.dart';
 
 class PageContainer extends StatelessWidget {
   final Widget child;
+  final bool fullWidth; // 🔥 Define se a página deve ocupar toda largura
 
-  const PageContainer({super.key, required this.child});
+  const PageContainer({
+    super.key,
+    required this.child,
+    this.fullWidth = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final layout = Theme.of(context).extension<AppPageLayoutTheme>()!;
-
-    // Quando fullWidth = true → ignora maxContentWidth e NÃO centraliza nada
-    if (layout.fullWidth) {
-      return Padding(padding: layout.pagePadding, child: child);
+    if (fullWidth) {
+      return Padding(
+        padding: AppLayout.paddingMd,
+        child: child,
+      );
     }
 
-    // Comportamento normal (centralizado + largura máxima)
-    Widget content = ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: layout.maxContentWidth),
-      child: Padding(padding: layout.pagePadding, child: child),
+    // Layout tradicional centralizado
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: AppLayout.maxContentWidth,
+        ),
+        child: Padding(
+          padding: AppLayout.paddingMd,
+          child: child,
+        ),
+      ),
     );
-
-    return layout.centerContent ? Center(child: content) : content;
   }
 }

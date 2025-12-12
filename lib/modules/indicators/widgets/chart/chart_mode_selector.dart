@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 
 class ChartModeSelector extends StatelessWidget {
   final ChartMode selected;
@@ -31,11 +32,7 @@ class ChartModeSelector extends StatelessWidget {
   }
 }
 
-/// ENUM interno ao selector (boa prática)
-enum ChartMode {
-  price,
-  volume,
-}
+enum ChartMode { price, volume }
 
 class _SegmentButton extends StatelessWidget {
   final String label;
@@ -50,27 +47,27 @@ class _SegmentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final filter = pkg.filters; // <- use 'filters' como definido no package
+    final text = pkg.text;
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: filter.padding,
         decoration: BoxDecoration(
-          color: active ? primary.withOpacity(0.15) : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          color: active ? filter.selectedBackground.withAlpha(60) : filter.background,
+          borderRadius: BorderRadius.circular(filter.radius),
           border: Border.all(
-            color: active ? primary : Colors.grey.shade600,
+            color: active ? filter.selectedBackground : filter.borderColor,
             width: 1.2,
           ),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            fontSize: 14,
-            color: active ? primary : Colors.grey.shade400,
-            fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+          style: text.button.copyWith(
+            color: active ? filter.selectedTextColor : filter.textColor,
           ),
         ),
       ),

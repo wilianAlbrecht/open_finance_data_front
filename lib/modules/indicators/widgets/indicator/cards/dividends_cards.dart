@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
 import '../components/indicator_compact_item.dart';
 
-// Helpers de formatação (atalhos para sua classe Format)
+// Helpers de formatação
 String fmt(num? v) => Format.number(v);
 String fmtPct(num? v) => Format.percent(v);
 String fmtMoney(num? v) => Format.money(v);
@@ -25,6 +26,12 @@ class DividendsCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pkg = Theme.of(context).extension<AppThemePackage>()!;
+    final text = pkg.text;
+
+    // ========================
+    // ITENS PRINCIPAIS
+    // ========================
     final mainItems = [
       IndicatorCompactItem(
         label: "Dividend Yield",
@@ -34,13 +41,19 @@ class DividendsCards extends StatelessWidget {
         label: "Dividend Yield TTM",
         value: fmtPct(data.dividendYieldTtm),
       ),
-      IndicatorCompactItem(label: "Dividend TTM", value: fmt(data.dividendTtm)),
+      IndicatorCompactItem(
+        label: "Dividend TTM",
+        value: fmt(data.dividendTtm),
+      ),
       IndicatorCompactItem(
         label: "Último Dividendo",
         value: fmt(data.lastDividendValue),
       ),
     ];
 
+    // ========================
+    // ITENS AVANÇADOS
+    // ========================
     final advancedItems = [
       IndicatorCompactItem(
         label: "5Y Avg Yield",
@@ -59,18 +72,37 @@ class DividendsCards extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Dividendos", style: Theme.of(context).textTheme.titleMedium),
+        // ========================
+        // TÍTULO
+        // ========================
+        Text(
+          "Dividendos",
+          style: text.sectionTitle,
+        ),
+
         const SizedBox(height: 8),
 
+        // ========================
+        // GRID DE INDICADORES
+        // ========================
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: [...mainItems, if (expanded) ...advancedItems],
+          children: [
+            ...mainItems,
+            if (expanded) ...advancedItems,
+          ],
         ),
 
+        // ========================
+        // BOTÃO EXPANDIR / CONTRAIR
+        // ========================
         TextButton(
           onPressed: onToggle,
-          child: Text(expanded ? "Ver menos" : "Ver mais"),
+          child: Text(
+            expanded ? "Ver menos" : "Ver mais",
+            style: text.showMoreButton,
+          ),
         ),
       ],
     );
