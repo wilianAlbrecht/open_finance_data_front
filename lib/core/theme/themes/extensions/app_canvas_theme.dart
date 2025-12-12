@@ -29,7 +29,7 @@ class AppCanvasTheme extends ThemeExtension<AppCanvasTheme> {
     required this.volumeTopColor,
     required this.volumeBottomColor,
     this.widthFactor = 0.70,   // padrão 70%
-    this.heightFactor = 0.70,  // altura padrão 32%
+    this.heightFactor = 0.60,  // altura padrão 32%
   });
 
   static const light = AppCanvasTheme(
@@ -43,7 +43,7 @@ class AppCanvasTheme extends ThemeExtension<AppCanvasTheme> {
     volumeTopColor: AppColors.volumeTopLight,
     volumeBottomColor: AppColors.volumeBottomLight,
     widthFactor: 0.70,
-    heightFactor: 0.70,
+    heightFactor: 0.60,
   );
 
   static const dark = AppCanvasTheme(
@@ -57,7 +57,7 @@ class AppCanvasTheme extends ThemeExtension<AppCanvasTheme> {
     volumeTopColor: AppColors.volumeTopDark,
     volumeBottomColor: AppColors.volumeBottomDark,
     widthFactor: 0.70,
-    heightFactor: 0.70,
+    heightFactor: 0.60,
   );
 
   @override

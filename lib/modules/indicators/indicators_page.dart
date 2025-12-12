@@ -28,16 +28,21 @@ class IndicatorsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: header.background,
-        title: Text(
-          'OpenFinanceData',
-          style: text.title.copyWith(color: header.titleColor),
-        ),
         elevation: 0,
+        toolbarHeight: 180,
+
+        title: Center(
+          child: Image.asset(
+            'assets/images/logo_open_finance_data.png',
+            height: 150,
+          ),
+        ),
+
         actions: const [ThemeToggleButton()],
       ),
 
       body: PageContainer(
-        fullWidth: true,  
+        fullWidth: true,
         child: Consumer2<IndicatorsController, FinancialIndicatorsController>(
           builder: (context, chartController, indicatorsController, _) {
             final bool isWide = MediaQuery.of(context).size.width > 1100;
