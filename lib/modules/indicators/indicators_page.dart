@@ -15,8 +15,16 @@ import '../../../core/widgets/theme_toggle_button.dart';
 import 'controllers/price_chart_controller.dart';
 import 'widgets/search_bar.dart';
 
-class IndicatorsPage extends StatelessWidget {
+class IndicatorsPage extends StatefulWidget {
   const IndicatorsPage({super.key});
+
+  @override
+  State<IndicatorsPage> createState() => _IndicatorsPageState();
+}
+
+class _IndicatorsPageState extends State<IndicatorsPage> {
+  /// 🔒 Controla se o scroll da página está travado
+  bool _lockScroll = false;
 
   @override
   Widget build(BuildContext context) {
@@ -28,27 +36,30 @@ class IndicatorsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: header.background,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 180,
-
         title: Center(
           child: Image.asset(
             'assets/images/logo_open_finance_data.png',
             height: 150,
           ),
         ),
-
         actions: const [ThemeToggleButton()],
       ),
-
       body: PageContainer(
         fullWidth: true,
         child: Consumer2<IndicatorsController, FinancialIndicatorsController>(
           builder: (context, chartController, indicatorsController, _) {
-            final bool isWide = MediaQuery.of(context).size.width > 1100;
+            final bool isWide =
+                MediaQuery.of(context).size.width > 1100;
 
             return ListView(
               padding: EdgeInsets.zero,
+              physics: _lockScroll
+                  ? const NeverScrollableScrollPhysics()
+                  : const BouncingScrollPhysics(),
               children: [
                 const SearchBarWidget(),
 
@@ -60,7 +71,8 @@ class IndicatorsPage extends StatelessWidget {
                   ),
 
                 // NENHUM RESULTADO
-                if (!chartController.isLoading && chartController.close.isEmpty)
+                if (!chartController.isLoading &&
+                    chartController.close.isEmpty)
                   Container(
                     height: 200,
                     margin: const EdgeInsets.symmetric(
@@ -70,15 +82,18 @@ class IndicatorsPage extends StatelessWidget {
                     padding: AppLayout.paddingMd,
                     decoration: BoxDecoration(
                       color: card.background,
-                      borderRadius: BorderRadius.circular(card.radius),
-                      border: Border.all(color: card.borderColor),
+                      borderRadius:
+                          BorderRadius.circular(card.radius),
+                      border:
+                          Border.all(color: card.borderColor),
                     ),
                     child: Center(
                       child: Text(
                         "Busque um ativo para visualizar o gráfico",
                         style: text.body.copyWith(
                           fontSize: 16,
-                          color: text.body.color!.withOpacity(0.7),
+                          color: text.body.color!
+                              .withOpacity(0.7),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -112,7 +127,7 @@ class IndicatorsPage extends StatelessWidget {
   }
 
   // =============================================================
-  // DESKTOP (Telas largas)
+  // DESKTOP / TELAS LARGAS
   // =============================================================
   Widget _buildWideLayout(
     BuildContext context,
@@ -121,52 +136,61 @@ class IndicatorsPage extends StatelessWidget {
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final pkg = Theme.of(context).extension<AppThemePackage>()!;
-        final double totalWidth = constraints.maxWidth;
-
         const double panelWidth = 380;
         const double minChartWidth = 800;
 
+        final double totalWidth = constraints.maxWidth;
         double chartWidth = totalWidth - panelWidth - 24;
-        if (chartWidth < minChartWidth) chartWidth = minChartWidth;
+        if (chartWidth < minChartWidth) {
+          chartWidth = minChartWidth;
+        }
 
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ============================
-            // GRÁFICO (ESQUERDA)
+            // GRÁFICO
             // ============================
             SizedBox(
               width: chartWidth,
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xs,
-                    ),
-                    child: Row(
-                      children: [
-                        const Expanded(child: OhlcFilterBar()),
-                        Expanded(
-                          child: Center(
-                            child: ChartModeSelector(
-                              selected: chart.chartMode,
-                              onChanged: chart.setChartMode,
+                  FractionallySizedBox(
+                    widthFactor: 0.90,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: OhlcFilterBar(),
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: ChartModeSelector(
+                                selected: chart.chartMode,
+                                onChanged:
+                                    chart.setChartMode,
+                              ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: RangeFilterBar(
-                              selected: chart.currentRange,
-                              onSelected: (range) =>
-                                  chart.setRange(context, range),
+                          Expanded(
+                            child: Align(
+                              alignment:
+                                  Alignment.centerRight,
+                              child: RangeFilterBar(
+                                selected:
+                                    chart.currentRange,
+                                onSelected: (range) =>
+                                    chart.setRange(
+                                        context, range),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
 
@@ -182,6 +206,11 @@ class IndicatorsPage extends StatelessWidget {
                     showHigh: chart.showHigh,
                     showLow: chart.showLow,
                     showClose: chart.showClose,
+                    onHoverScrollLock: (locked) {
+                      setState(() {
+                        _lockScroll = locked;
+                      });
+                    },
                   ),
                 ],
               ),
@@ -190,11 +219,12 @@ class IndicatorsPage extends StatelessWidget {
             const SizedBox(width: AppSpacing.lg),
 
             // ============================
-            // INDICADORES (DIREITA)
+            // INDICADORES
             // ============================
             SizedBox(
               width: panelWidth,
-              child: _buildIndicatorsPanel(context, indicators),
+              child:
+                  _buildIndicatorsPanel(context, indicators),
             ),
           ],
         );
@@ -226,7 +256,8 @@ class IndicatorsPage extends StatelessWidget {
             Expanded(
               child: RangeFilterBar(
                 selected: chart.currentRange,
-                onSelected: (range) => chart.setRange(context, range),
+                onSelected: (range) =>
+                    chart.setRange(context, range),
               ),
             ),
           ],
@@ -244,6 +275,11 @@ class IndicatorsPage extends StatelessWidget {
           showHigh: chart.showHigh,
           showLow: chart.showLow,
           showClose: chart.showClose,
+          onHoverScrollLock: (locked) {
+            setState(() {
+              _lockScroll = locked;
+            });
+          },
         ),
 
         const SizedBox(height: 30),
@@ -286,8 +322,11 @@ class IndicatorsPage extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.only(left: 4, right: 4, top: 12),
-        child: IndicatorCards(data: indicators.data!),
+        padding:
+            const EdgeInsets.only(left: 4, right: 4, top: 12),
+        child: IndicatorCards(
+          data: indicators.data!,
+        ),
       ),
     );
   }
