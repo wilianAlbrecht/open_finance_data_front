@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 
@@ -50,6 +52,7 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
   Offset? hoveredPosition;
 
   CanvasLineChartBuilder? _priceBuilder;
+  CanvasMountainChartBuilder? _volumeBuilder;
 
   // PAN state
   double? _lastDragX;
@@ -85,22 +88,43 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
   // 🔍 ZOOM (SCROLL)
   // ------------------------------------------------------------
   void _onScrollZoom(PointerScrollEvent event) {
-    if (widget.chartMode != ChartMode.price) return;
-    if (_priceBuilder == null) return;
+    if (hoveredPosition == null) return;
 
-    const zoomStep = 0.2;
+    const zoomStep = 0.25;
+    final delta = event.scrollDelta.dy < 0 ? zoomStep : -zoomStep;
 
     setState(() {
-      if (event.scrollDelta.dy < 0) {
-        _priceBuilder!.zoom += zoomStep;
-      } else {
-        _priceBuilder!.zoom -= zoomStep;
+      if (widget.chartMode == ChartMode.price && _priceBuilder != null) {
+        _applyZoomCentered(
+          deltaZoom: delta,
+          mouseX: hoveredPosition!.dx,
+          chartLeft: _priceBuilder!.paddingLeft,
+          chartRight: _priceBuilder!.chartWidth - _priceBuilder!.paddingRight,
+          totalCount: widget.close.length,
+          currentZoom: _priceBuilder!.zoom,
+          minZoom: _priceBuilder!.minZoom,
+          maxZoom: _priceBuilder!.maxZoom,
+          getPan: () => _priceBuilder!.panOffset.toDouble(),
+          setPan: (v) => _priceBuilder!.panOffset = -v.toInt(),
+          setZoom: (v) => _priceBuilder!.zoom = v,
+        );
       }
 
-      _priceBuilder!.zoom = _priceBuilder!.zoom.clamp(
-        _priceBuilder!.minZoom,
-        _priceBuilder!.maxZoom,
-      );
+      if (widget.chartMode == ChartMode.volume && _volumeBuilder != null) {
+        _applyZoomCentered(
+          deltaZoom: delta,
+          mouseX: hoveredPosition!.dx,
+          chartLeft: _volumeBuilder!.paddingLeft,
+          chartRight: _volumeBuilder!.chartWidth - _volumeBuilder!.paddingRight,
+          totalCount: widget.volume.length,
+          currentZoom: _volumeBuilder!.zoom,
+          minZoom: _volumeBuilder!.minZoom,
+          maxZoom: _volumeBuilder!.maxZoom,
+          getPan: () => _volumeBuilder!.panOffset,
+          setPan: (v) => _volumeBuilder!.panOffset = v,
+          setZoom: (v) => _volumeBuilder!.zoom = v,
+        );
+      }
     });
   }
 
@@ -113,39 +137,81 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
 
   void _onPanUpdate(DragUpdateDetails details) {
     if (_priceBuilder == null) return;
-    if (widget.chartMode != ChartMode.price) return;
+    if (widget.chartMode == ChartMode.price) {
+      final dx =
+          details.localPosition.dx - (_lastDragX ?? details.localPosition.dx);
+      _lastDragX = details.localPosition.dx;
 
-    final dx =
-        details.localPosition.dx - (_lastDragX ?? details.localPosition.dx);
-    _lastDragX = details.localPosition.dx;
+      final usableWidth =
+          _priceBuilder!.chartWidth -
+          _priceBuilder!.paddingLeft -
+          _priceBuilder!.paddingRight;
 
-    final usableWidth =
-        _priceBuilder!.chartWidth -
-        _priceBuilder!.paddingLeft -
-        _priceBuilder!.paddingRight;
+      final visibleCount = (widget.close.length / _priceBuilder!.zoom).clamp(
+        10,
+        widget.close.length,
+      );
 
-    final visibleCount = (widget.close.length / _priceBuilder!.zoom).clamp(
-      10,
-      widget.close.length,
-    );
+      final pixelsPerPoint = usableWidth / visibleCount;
+      if (pixelsPerPoint <= 0) return;
 
-    final pixelsPerPoint = usableWidth / visibleCount;
-    if (pixelsPerPoint <= 0) return;
+      _panPixelRemainder += dx;
 
-    _panPixelRemainder += dx;
+      final deltaPoints = (_panPixelRemainder / pixelsPerPoint).floor();
 
-    final deltaPoints = (_panPixelRemainder / pixelsPerPoint).floor();
+      if (deltaPoints != 0) {
+        _panPixelRemainder -= deltaPoints * pixelsPerPoint;
 
-    if (deltaPoints != 0) {
+        setState(() {
+          _priceBuilder!.panOffset += deltaPoints;
+
+          _priceBuilder!.panOffset = _priceBuilder!.panOffset.clamp(
+            0,
+            widget.close.length,
+          );
+        });
+      }
+    } else if (widget.chartMode == ChartMode.volume) {
+      if (_volumeBuilder == null) return;
+
+      final dx =
+          details.localPosition.dx - (_lastDragX ?? details.localPosition.dx);
+      _lastDragX = details.localPosition.dx;
+
+      final usableWidth =
+          _volumeBuilder!.chartWidth -
+          _volumeBuilder!.paddingLeft -
+          _volumeBuilder!.paddingRight;
+
+      final visibleCount = (widget.volume.length / _volumeBuilder!.zoom).clamp(
+        10,
+        widget.volume.length,
+      );
+
+      final pixelsPerPoint = usableWidth / visibleCount;
+      if (pixelsPerPoint <= 0) return;
+
+      _panPixelRemainder += dx;
+
+      final deltaPoints = (_panPixelRemainder / pixelsPerPoint).floor();
+
+      if (deltaPoints == 0) return;
+
       _panPixelRemainder -= deltaPoints * pixelsPerPoint;
 
       setState(() {
-        // 🔄 direção invertida (como você pediu)
-        _priceBuilder!.panOffset += deltaPoints;
+        _volumeBuilder!.panOffset -= deltaPoints;
+        final totalCount = widget.volume.length;
+        final visibleCount = (totalCount / _volumeBuilder!.zoom).clamp(
+          10,
+          totalCount,
+        );
 
-        _priceBuilder!.panOffset = _priceBuilder!.panOffset.clamp(
+        final maxPan = max(0, totalCount - visibleCount);
+
+        _volumeBuilder!.panOffset = _volumeBuilder!.panOffset.clamp(
           0,
-          widget.close.length,
+          maxPan.toDouble(),
         );
       });
     }
@@ -222,18 +288,22 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
     // MODO VOLUME
     // =========================
     else {
-      final builder = CanvasMountainChartBuilder(
-        volume: widget.volume,
-        timestamp: widget.timestamp,
-        paddingLeft: 58,
-        paddingRight: 25,
-        paddingTop: 18,
-        paddingBottom: 35,
-        chartWidth: chartWidth,
-        chartHeight: chartHeight,
-      );
+      if (_volumeBuilder == null ||
+          _volumeBuilder!.chartWidth != chartWidth ||
+          _volumeBuilder!.chartHeight != chartHeight) {
+        _volumeBuilder = CanvasMountainChartBuilder(
+          volume: widget.volume,
+          timestamp: widget.timestamp,
+          paddingLeft: 58,
+          paddingRight: 25,
+          paddingTop: 18,
+          paddingBottom: 35,
+          chartWidth: chartWidth,
+          chartHeight: chartHeight,
+        );
+      }
 
-      chartData = builder.build();
+      chartData = _volumeBuilder!.build();
 
       painter = CanvasMountainPainter(
         data: chartData,
@@ -318,5 +388,40 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
     }
 
     return nearest;
+  }
+
+  void _applyZoomCentered({
+    required double deltaZoom,
+    required double mouseX,
+    required double chartLeft,
+    required double chartRight,
+    required int totalCount,
+    required double currentZoom,
+    required double minZoom,
+    required double maxZoom,
+    required double Function() getPan,
+    required void Function(double) setPan,
+    required void Function(double) setZoom,
+  }) {
+    final usableWidth = chartRight - chartLeft;
+    if (usableWidth <= 0) return;
+
+    final oldZoom = currentZoom;
+    final newZoom = (currentZoom + deltaZoom).clamp(minZoom, maxZoom);
+
+    if (oldZoom == newZoom) return;
+
+    final oldVisible = (totalCount / oldZoom).clamp(10, totalCount);
+
+    final newVisible = (totalCount / newZoom).clamp(10, totalCount);
+
+    final ratio = ((mouseX - chartLeft) / usableWidth).clamp(0.0, 1.0);
+
+    final hoveredIndex = getPan() + ratio * oldVisible;
+
+    final newPan = hoveredIndex - (1 - ratio) * newVisible;
+
+    setZoom(newZoom);
+    setPan(newPan);
   }
 }

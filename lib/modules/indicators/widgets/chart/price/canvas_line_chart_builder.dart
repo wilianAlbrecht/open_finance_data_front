@@ -124,19 +124,14 @@ class CanvasLineChartBuilder {
     // -------------------------------------------------
     final totalCount = close.length;
 
-    final visibleCount =
-        (totalCount / zoom).clamp(10, totalCount).toInt();
+    final visibleCount = (totalCount / zoom).clamp(10, totalCount).toInt();
 
-    panOffset = panOffset.clamp(
-      0,
-      max(0, totalCount - visibleCount),
-    );
+    panOffset = panOffset.clamp(0, max(0, totalCount - visibleCount));
 
     final endIndex = totalCount - panOffset;
     final startIndex = (endIndex - visibleCount).clamp(0, totalCount);
 
-    List<double> slice(List<double> s) =>
-        s.sublist(startIndex, endIndex);
+    List<double> slice(List<double> s) => s.sublist(startIndex, endIndex);
 
     final openV = slice(open);
     final highV = slice(high);
@@ -200,10 +195,7 @@ class CanvasLineChartBuilder {
 
     List<Offset> buildPoints(List<double> series) {
       return List.generate(series.length, (i) {
-        return Offset(
-          chartLeft + i * dx,
-          valueToY(series[i]),
-        );
+        return Offset(chartLeft + i * dx, valueToY(series[i]));
       });
     }
 
@@ -212,8 +204,9 @@ class CanvasLineChartBuilder {
     final lowPoints = showLow ? buildPoints(lowV) : <Offset>[];
     final closePoints = showClose ? buildPoints(closeV) : <Offset>[];
 
-    final basePoints =
-        closePoints.isNotEmpty ? closePoints : buildPoints(closeV);
+    final basePoints = closePoints.isNotEmpty
+        ? closePoints
+        : buildPoints(closeV);
 
     // -------------------------------------------------
     // 5. GRID Y
@@ -228,8 +221,7 @@ class CanvasLineChartBuilder {
       gridY.add(valueToY(v));
     }
 
-    final yLabels =
-        gridValues.map((v) => v.toStringAsFixed(2)).toList();
+    final yLabels = gridValues.map((v) => v.toStringAsFixed(2)).toList();
 
     // -------------------------------------------------
     // 6. LABELS X
@@ -247,8 +239,7 @@ class CanvasLineChartBuilder {
     }
 
     final xLabels = labelIndexes.map((i) {
-      final dt =
-          DateTime.fromMillisecondsSinceEpoch(timestampV[i] * 1000);
+      final dt = DateTime.fromMillisecondsSinceEpoch(timestampV[i] * 1000);
       return "${dt.day}/${dt.month}/${dt.year}";
     }).toList();
 
@@ -282,11 +273,7 @@ class CanvasLineChartBuilder {
     }
     if (showLow) {
       tooltipSeries.add(
-        TooltipSeries(
-          label: "Low",
-          color: chartColor.lowColor,
-          values: lowV,
-        ),
+        TooltipSeries(label: "Low", color: chartColor.lowColor, values: lowV),
       );
     }
     if (showClose) {

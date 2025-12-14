@@ -54,6 +54,14 @@ class CanvasMountainChartBuilder {
   final List<double> volume;
   final List<int> timestamp;
 
+  // Pan
+  double panOffset = 0.0;
+
+  // Zoom
+  double zoom = 1.0;
+  final double minZoom = 1.0;
+  final double maxZoom = 8.0;
+
   final double paddingLeft;
   final double paddingRight;
   final double paddingTop;
@@ -133,14 +141,36 @@ class CanvasMountainChartBuilder {
     }
 
     // -------------------------------------------------
+    // 2.5. Zoom + Pan (janela visível)
+    // -------------------------------------------------
+    final totalCount = volume.length;
+
+    // Quantos pontos ficam visíveis com o zoom
+    final visibleCount = (totalCount / zoom).clamp(10, totalCount).toInt();
+
+    // Limite máximo de pan
+    final maxPan = max(0, totalCount - visibleCount);
+
+    // panOffset controla o início da janela
+    final startIndex = panOffset.round().clamp(0, maxPan);
+
+    // fim da janela
+    final endIndex = startIndex + visibleCount;
+
+    // fatia visível
+    final visibleVolume = volume.sublist(startIndex, endIndex);
+
+    final visibleTimestamp = timestamp.sublist(startIndex, endIndex);
+
+    // -------------------------------------------------
     // 3. Pontos do topo da montanha
     // -------------------------------------------------
-    final count = volume.length;
+    final count = visibleVolume.length;
     final dx = count > 1 ? usableWidth / (count - 1) : 0.0;
 
     final List<Offset> topPoints = List.generate(count, (i) {
       final x = chartLeft + i * dx;
-      final y = valueToY(volume[i]);
+      final y = valueToY(visibleVolume[i]);
       return Offset(x, y);
     });
 
@@ -198,7 +228,7 @@ class CanvasMountainChartBuilder {
     }
 
     final List<String> xLabels = labelIndexes.map((i) {
-      final ts = timestamp[i];
+      final ts = visibleTimestamp[i];
       final dt = DateTime.fromMillisecondsSinceEpoch(
         ts * 1000,
         isUtc: true,
@@ -210,7 +240,7 @@ class CanvasMountainChartBuilder {
     }).toList();
 
     // labels completos (um por ponto) para hover
-    final List<String> fullXLabels = timestamp.map((ts) {
+    final List<String> fullXLabels = visibleTimestamp.map((ts) {
       final dt = DateTime.fromMillisecondsSinceEpoch(
         ts * 1000,
         isUtc: true,
