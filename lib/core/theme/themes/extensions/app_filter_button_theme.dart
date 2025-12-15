@@ -9,6 +9,9 @@ class AppFilterButtonTheme extends ThemeExtension<AppFilterButtonTheme> {
   final Color textColor;
   final double radius;
   final EdgeInsets padding;
+  final double horizontalGapFactor;
+  final double minGap;
+  final double maxGap;
 
   // 🔥 Getters adicionais para compatibilidade com o RangeFilterBar
   Color get selectedBg => selectedBackground;
@@ -24,6 +27,9 @@ class AppFilterButtonTheme extends ThemeExtension<AppFilterButtonTheme> {
     required this.selectedTextColor,
     required this.radius,
     required this.padding,
+    this.horizontalGapFactor = 0.05,
+    this.minGap = 8.0,
+    this.maxGap = 24.0,
   });
 
   static const light = AppFilterButtonTheme(
@@ -35,6 +41,9 @@ class AppFilterButtonTheme extends ThemeExtension<AppFilterButtonTheme> {
     selectedTextColor: Colors.black,
     radius: 12,
     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    horizontalGapFactor : 0.05,
+    minGap : 8.0,
+    maxGap : 24.0,
   );
 
   static const dark = AppFilterButtonTheme(
@@ -47,6 +56,9 @@ class AppFilterButtonTheme extends ThemeExtension<AppFilterButtonTheme> {
     selectedTextColor: Colors.white,
     radius: 12,
     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    horizontalGapFactor : 0.05,
+    minGap : 8.0,
+    maxGap : 24.0,
   );
 
   @override

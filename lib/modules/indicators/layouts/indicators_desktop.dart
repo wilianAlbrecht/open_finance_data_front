@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 
 import '../controllers/price_chart_controller.dart';
 import '../controllers/financial_indicators_controller.dart';
@@ -69,27 +70,39 @@ class _ChartControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Expanded(child: OhlcFilterBar()),
-        Expanded(
-          child: Center(
-            child: ChartModeSelector(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final pkg = Theme.of(context).extension<AppThemePackage>()!;
+        final filterLayout = pkg.filters;
+
+        final gap = (constraints.maxWidth * filterLayout.horizontalGapFactor)
+            .clamp(filterLayout.minGap, filterLayout.maxGap);
+
+        return Row(
+          children: [
+            // ESQUERDA
+            OhlcFilterBar(),
+
+            SizedBox(width: gap),
+            const Spacer(),
+
+            // CENTRO
+            ChartModeSelector(
               selected: chart.chartMode,
               onChanged: chart.setChartMode,
             ),
-          ),
-        ),
-        Expanded(
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: RangeFilterBar(
+
+            const Spacer(),
+            SizedBox(width: gap),
+
+            // DIREITA
+            RangeFilterBar(
               selected: chart.currentRange,
               onSelected: (range) => chart.setRange(context, range),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
@@ -101,7 +114,6 @@ class _IndicatorsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     if (indicators.errorMessage != null) {
       return Padding(
         padding: const EdgeInsets.all(16),
