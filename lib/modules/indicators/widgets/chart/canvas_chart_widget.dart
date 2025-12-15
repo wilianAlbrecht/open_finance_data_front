@@ -65,22 +65,24 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
   void didUpdateWidget(covariant CanvasChartWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (_priceBuilder == null) return;
+    final dataChanged =
+        oldWidget.timestamp != widget.timestamp ||
+        oldWidget.open != widget.open ||
+        oldWidget.high != widget.high ||
+        oldWidget.low != widget.low ||
+        oldWidget.close != widget.close ||
+        oldWidget.volume != widget.volume ||
+        oldWidget.chartMode != widget.chartMode;
 
-    final filtersChanged =
+    final visibilityChanged =
         oldWidget.showOpen != widget.showOpen ||
         oldWidget.showHigh != widget.showHigh ||
         oldWidget.showLow != widget.showLow ||
         oldWidget.showClose != widget.showClose;
 
-    if (filtersChanged) {
-      setState(() {
-        _priceBuilder!
-          ..showOpen = widget.showOpen
-          ..showHigh = widget.showHigh
-          ..showLow = widget.showLow
-          ..showClose = widget.showClose;
-      });
+    if (dataChanged || visibilityChanged) {
+      _priceBuilder = null;
+      _volumeBuilder = null;
     }
   }
 
@@ -263,6 +265,36 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
         widget.showHigh ||
         widget.showLow ||
         widget.showClose;
+
+    // =========================
+    // ESTADO INICIAL (SEM BUSCA)
+    // =========================
+    if (widget.timestamp.isEmpty) {
+      return SizedBox(
+        width: chartWidth,
+        height: chartHeight,
+        child: const Center(
+          child: Text(
+            'Pesquise um ativo para visualizar o gráfico',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+        ),
+      );
+    }
+
+    // =========================
+    // GUARDA DE DADOS
+    // =========================
+    final int dataLength = widget.timestamp.length;
+
+    if (dataLength < 2) {
+      return SizedBox(
+        width: chartWidth,
+        height: chartHeight,
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     // =========================
     // MODO PREÇO

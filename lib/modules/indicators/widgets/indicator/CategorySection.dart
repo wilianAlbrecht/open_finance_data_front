@@ -24,7 +24,6 @@ class _CategorySectionState extends State<CategorySection> {
   @override
   Widget build(BuildContext context) {
     final pkg = Theme.of(context).extension<AppThemePackage>()!;
-    final layout = Theme.of(context).extension<AppLayout>()!;
     final text = pkg.text;
 
     return Center(
