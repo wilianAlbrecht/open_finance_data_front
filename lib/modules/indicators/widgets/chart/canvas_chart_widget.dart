@@ -138,7 +138,6 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    if (_priceBuilder == null) return;
     if (widget.chartMode == ChartMode.price) {
       final dx =
           details.localPosition.dx - (_lastDragX ?? details.localPosition.dx);
