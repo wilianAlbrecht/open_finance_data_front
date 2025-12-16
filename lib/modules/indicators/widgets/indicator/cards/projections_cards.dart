@@ -1,100 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 import 'package:open_finance_data_front/core/utils/formatters.dart';
 import 'package:open_finance_data_front/data/models/indicators_model.dart';
-import '../components/indicator_compact_item.dart';
-
-// Helpers de formatação
-String fmt(num? v) => Format.number(v);
-String fmtPct(num? v) => Format.percent(v);
-String fmtMoney(num? v) => Format.money(v);
-String fmtCompact(num? v) => Format.compact(v);
-String fmtInt(num? v) => Format.integer(v);
-String fmtDate(num? v) => Format.date(v);
+import 'package:open_finance_data_front/modules/indicators/widgets/indicator/indicator_section.dart';
+import 'package:open_finance_data_front/modules/indicators/widgets/indicator/models/indicator_item_data.dart';
 
 class ProjectionsCards extends StatelessWidget {
   final IndicatorsModel data;
   final bool expanded;
   final VoidCallback onToggle;
+  final int columns;
 
   const ProjectionsCards({
     super.key,
     required this.data,
     required this.expanded,
     required this.onToggle,
+    required this.columns,
   });
 
   @override
   Widget build(BuildContext context) {
-    final pkg = Theme.of(context).extension<AppThemePackage>()!;
-    final text = pkg.text;
-
-    final mainItems = [
-      IndicatorCompactItem(
+    final main = [
+      IndicatorItemData(
         label: "Target Mean Price",
-        value: fmt(data.targetMeanPrice),
+        value: Format.money(data.targetMeanPrice),
+        highlight: true,
       ),
-      IndicatorCompactItem(
+      IndicatorItemData(
         label: "Target High Price",
-        value: fmt(data.targetHighPrice),
+        value: Format.money(data.targetHighPrice),
       ),
-      IndicatorCompactItem(
+      IndicatorItemData(
         label: "Target Low Price",
-        value: fmt(data.targetLowPrice),
+        value: Format.money(data.targetLowPrice),
       ),
-      IndicatorCompactItem(
+      IndicatorItemData(
         label: "Recommendation Mean",
-        value: fmt(data.recommendationMean),
+        value: Format.number(data.recommendationMean),
       ),
-    ];
-
-    final advancedItems = [
-      IndicatorCompactItem(
+      IndicatorItemData(
         label: "Analyst Opinions",
-        value: fmtInt(data.numberOfAnalystOpinions),
+        value: Format.integer(data.numberOfAnalystOpinions),
       ),
-      IndicatorCompactItem(
+      IndicatorItemData(
         label: "Target Median Price",
-        value: fmt(data.targetMedianPrice),
+        value: Format.money(data.targetMedianPrice),
       ),
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ========================
-        // TÍTULO DA SEÇÃO
-        // ========================
-        Text(
-          "Projeções & Analistas",
-          style: text.sectionTitle,
-        ),
-
-        const SizedBox(height: 8),
-
-        // ========================
-        // ITENS PRINCIPAIS / AVANÇADOS
-        // ========================
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            ...mainItems,
-            if (expanded) ...advancedItems,
-          ],
-        ),
-
-        // ========================
-        // BOTÃO EXPANDIR
-        // ========================
-        TextButton(
-          onPressed: onToggle,
-          child: Text(
-            expanded ? "Ver menos" : "Ver mais",
-            style: text.showMoreButton,
-          ),
-        ),
-      ],
+    return IndicatorSection(
+      title: "Projeções & Analistas",
+      items: [...main],
+      expanded: expanded,
+      onToggle: onToggle,
+      columns: columns,
     );
   }
 }

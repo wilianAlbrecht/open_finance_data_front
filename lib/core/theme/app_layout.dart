@@ -22,8 +22,8 @@ class AppLayout {
   // ================
   //     PADDINGS
   // ================
-  static const EdgeInsets paddingMd = EdgeInsets.all(16);
   static const EdgeInsets paddingSm = EdgeInsets.all(8);
+  static const EdgeInsets paddingMd = EdgeInsets.all(16);
   static const EdgeInsets paddingLg = EdgeInsets.all(24);
 
   // Espaço reservado para os eixos do gráfico
@@ -59,4 +59,10 @@ class AppLayout {
   // Borda padrão leve
   static BorderSide get defaultBorder =>
       BorderSide(color: Colors.black12, width: 1);
+
+  // INDICATOR ITEMS
+  static const EdgeInsets indicatorItemPadding = EdgeInsets.symmetric(
+    horizontal: 12,
+    vertical: 1,
+  );
 }

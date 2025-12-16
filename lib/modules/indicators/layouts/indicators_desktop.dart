@@ -94,7 +94,10 @@ class IndicatorsDesktopLayout extends StatelessWidget {
           width: indicatorsWidth,
           child: Align(
             alignment: Alignment.topCenter,
-            child: _IndicatorsSection(indicators: indicators),
+            child: _IndicatorsSection(
+              indicators: indicators,
+              columns: indicatorColumns,
+            ),
           ),
         ),
       ],
@@ -148,8 +151,9 @@ class _ChartControls extends StatelessWidget {
 
 class _IndicatorsSection extends StatelessWidget {
   final FinancialIndicatorsController indicators;
+  final int columns;
 
-  const _IndicatorsSection({required this.indicators});
+  const _IndicatorsSection({required this.indicators, required this.columns});
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +171,6 @@ class _IndicatorsSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return IndicatorCards(data: indicators.data!,);
+    return IndicatorCards(data: indicators.data!, columns: columns);
   }
 }

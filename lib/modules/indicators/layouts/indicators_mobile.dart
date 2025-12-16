@@ -88,7 +88,10 @@ class IndicatorsMobileLayout extends StatelessWidget {
         else if (indicators.data != null)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: IndicatorCards(data: indicators.data!),
+            child: IndicatorCards(
+              data: indicators.data!,
+              columns: AppResponsiveConfig.indicatorColumnsFor(screenWidth),
+            ),
           ),
       ],
     );
