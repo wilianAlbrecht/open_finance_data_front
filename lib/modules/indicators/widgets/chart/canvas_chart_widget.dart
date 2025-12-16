@@ -13,6 +13,9 @@ import 'package:open_finance_data_front/modules/indicators/widgets/chart/volume/
 class CanvasChartWidget extends StatefulWidget {
   final ChartMode chartMode;
 
+  final double width;
+  final double height;
+
   final List<double> open;
   final List<double> high;
   final List<double> low;
@@ -41,6 +44,8 @@ class CanvasChartWidget extends StatefulWidget {
     required this.showLow,
     required this.showClose,
     this.onHoverScrollLock,
+    required this.width,
+    required this.height,
   });
 
   @override
@@ -237,8 +242,8 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
       showLow: widget.showLow,
       showClose: widget.showClose,
       timestamp: widget.timestamp,
-      paddingLeft: 58,
-      paddingRight: 25,
+      paddingLeft: 50,
+      paddingRight: 0,
       paddingTop: 18,
       paddingBottom: 35,
       chartWidth: w,
@@ -250,11 +255,9 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
   @override
   Widget build(BuildContext context) {
     final pkg = Theme.of(context).extension<AppThemePackage>()!;
-    final canvas = pkg.canvas;
 
-    final chartWidth = MediaQuery.of(context).size.width * canvas.widthFactor;
-    final chartHeight =
-        MediaQuery.of(context).size.height * canvas.heightFactor;
+    final chartWidth = widget.width;
+    final chartHeight = widget.height;
 
     dynamic chartData;
     CustomPainter painter;
@@ -325,8 +328,8 @@ class _CanvasChartWidgetState extends State<CanvasChartWidget> {
         _volumeBuilder = CanvasMountainChartBuilder(
           volume: widget.volume,
           timestamp: widget.timestamp,
-          paddingLeft: 58,
-          paddingRight: 25,
+          paddingLeft: 15,
+          paddingRight: 0,
           paddingTop: 18,
           paddingBottom: 35,
           chartWidth: chartWidth,

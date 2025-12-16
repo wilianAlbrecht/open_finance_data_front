@@ -3,32 +3,27 @@ import 'package:open_finance_data_front/core/theme/app_layout.dart';
 
 class IndicatorGrid extends StatelessWidget {
   final List<Widget> children;
+  final int columns;
 
-  const IndicatorGrid({super.key, required this.children});
+  const IndicatorGrid({
+    super.key,
+    required this.children,
+    required this.columns,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-
-    // ============================
-    //   BREAKPOINTS DO GRID
-    // ============================
-    final crossAxisCount =
-        width >= AppLayout.desktopBreakpoint ? 3 : 2;
-
     return GridView.builder(
       shrinkWrap: true,
-      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
       itemCount: children.length,
-
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
+        crossAxisCount: columns,
         crossAxisSpacing: AppLayout.indicatorGridSpacing,
         mainAxisSpacing: AppLayout.indicatorGridSpacing,
         childAspectRatio: AppLayout.indicatorAspectRatio,
       ),
-
       itemBuilder: (_, i) => children[i],
     );
   }

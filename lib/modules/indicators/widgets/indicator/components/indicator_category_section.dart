@@ -6,12 +6,14 @@ class IndicatorCategorySection extends StatefulWidget {
   final String title;
   final List<Widget> mainItems;
   final List<Widget> advancedItems;
+  final int columns;
 
   const IndicatorCategorySection({
     super.key,
     required this.title,
     required this.mainItems,
     required this.advancedItems,
+    required this.columns,
   });
 
   @override
@@ -44,7 +46,7 @@ class _IndicatorCategorySectionState extends State<IndicatorCategorySection> {
         // =======================
         // INDICADORES PRINCIPAIS
         // =======================
-        IndicatorGrid(children: widget.mainItems),
+        IndicatorGrid(columns: widget.columns, children: widget.mainItems),
 
         // =======================
         // INDICADORES AVANÇADOS
@@ -52,7 +54,7 @@ class _IndicatorCategorySectionState extends State<IndicatorCategorySection> {
         if (expanded && widget.advancedItems.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: IndicatorGrid(children: widget.advancedItems),
+            child: IndicatorGrid(columns: widget.columns, children: widget.advancedItems),
           ),
 
         // =======================

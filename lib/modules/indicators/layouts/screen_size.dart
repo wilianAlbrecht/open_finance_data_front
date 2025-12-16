@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 enum ScreenSize {
   mobile,
@@ -6,14 +6,19 @@ enum ScreenSize {
 }
 
 class ScreenSizeResolver {
-  /// PONTO ÚNICO DE DECISÃO
   static ScreenSize resolve(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
+    final width = MediaQuery.of(context).size.width;
 
-    if (width < 1024) {
-      return ScreenSize.mobile;
+    // ===============================
+    // DESKTOP
+    // ===============================
+    if (width >= 1300) {
+      return ScreenSize.desktop;
     }
 
-    return ScreenSize.desktop;
+    // ===============================
+    // MOBILE + COMPACT
+    // ===============================
+    return ScreenSize.mobile;
   }
 }

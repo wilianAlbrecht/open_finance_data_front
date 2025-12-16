@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_finance_data_front/core/layout/app_responsive_config.dart';
 import 'package:open_finance_data_front/core/theme/themes/extensions/app_theme_package.dart';
 
 import '../controllers/price_chart_controller.dart';
@@ -24,40 +25,78 @@ class IndicatorsDesktopLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final screenSize = MediaQuery.of(context).size;
+
+    final chartWidthFactor = AppResponsiveConfig.chartWidthFactorFor(
+      screenSize.width,
+    );
+
+    final chartHeightFactor = AppResponsiveConfig.chartHeightFactorFor(
+      screenSize.width,
+    );
+
+    final chartWidth = screenSize.width * chartWidthFactor;
+    final chartHeight = screenSize.height * chartHeightFactor;
+
+    final indicatorsWidth =
+        screenWidth *
+        (AppResponsiveConfig.layoutUsageFactor - chartWidthFactor);
+
+    final indicatorColumns = AppResponsiveConfig.indicatorColumnsFor(
+      screenWidth,
+    );
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // =====================
         // GRÁFICO
         // =====================
-        Expanded(
-          child: Column(
-            children: [
-              if (chart.timestamp.isNotEmpty) _ChartControls(chart: chart),
-              CanvasChartWidget(
-                chartMode: chart.chartMode,
-                open: chart.open,
-                high: chart.high,
-                low: chart.low,
-                close: chart.close,
-                volume: chart.volume,
-                timestamp: chart.timestamp,
-                showOpen: chart.showOpen,
-                showHigh: chart.showHigh,
-                showLow: chart.showLow,
-                showClose: chart.showClose,
-                onHoverScrollLock: onScrollLock,
-              ),
-            ],
+        SizedBox(
+          width: chartWidth,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (chart.timestamp.isNotEmpty) _ChartControls(chart: chart),
+
+                CanvasChartWidget(
+                  chartMode: chart.chartMode,
+                  open: chart.open,
+                  high: chart.high,
+                  low: chart.low,
+                  close: chart.close,
+                  volume: chart.volume,
+                  timestamp: chart.timestamp,
+                  showOpen: chart.showOpen,
+                  showHigh: chart.showHigh,
+                  showLow: chart.showLow,
+                  showClose: chart.showClose,
+                  onHoverScrollLock: onScrollLock,
+                  width: chartWidth,
+                  height: chartHeight,
+                ),
+              ],
+            ),
           ),
         ),
 
         const SizedBox(width: 32),
 
         // =====================
-        // INDICADORES
+        // INDICADORES (25%)
         // =====================
-        SizedBox(width: 380, child: _IndicatorsSection(indicators: indicators)),
+        SizedBox(
+          width: indicatorsWidth,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: _IndicatorsSection(indicators: indicators),
+          ),
+        ),
       ],
     );
   }
@@ -128,6 +167,6 @@ class _IndicatorsSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return IndicatorCards(data: indicators.data!);
+    return IndicatorCards(data: indicators.data!,);
   }
 }
